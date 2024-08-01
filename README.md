@@ -41,3 +41,10 @@ Once the preprocessing has finished, eQTL mapping can be run in the same way as 
 
 ## Test running from example dataset from GEUVADIS
 For convenience, we have provided a toy dataset from the GEUVADIS dataset consisting of 30 samples. Please feel free to test both privateQTL versions. Please note that smaller samples sizes means lower accuracy for privateQTL-II MPC preprocessing. 
+Please unzip ```example.tar.gz``` file. Inside, you will find:
+- toy_GEUVADIS_preprocessed_geno.tsv : genotype data, fully processed via projection onto reference panel.
+- toy_GEUVADIS_deseq2_pheno.tsv : phenotype data, fully processed with deseq2 normalization and aggregated PCA.
+- toy_pheno_position.tsv : phenotype position indexing.
+- toy_geno_position.tsv : genotype position indexing.
+- toy_GEUVADIS_raw_reads_pheno.tsv : raw reads, used as input for privateQTL-II preprocessing.
+- zscores.txt : pre-computed zscores for 30 samples. Used as input for privateQTL-II preprocessing. 
