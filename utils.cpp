@@ -540,9 +540,7 @@ int learnDF(vector < double > & corr, double & df) {
 
 	// pair<vector<double>*, double> params(&corr, df);
     data_to_function * par  = new data_to_function (corr.size(), &corr[0]);
-    // cout << "1" << endl;
-    // pair<int, double*> params (corr.size(), &corr[0]);
-    // cout << "2" << endl;
+
 	gsl_multimin_function minex_func;
 	minex_func.n = 1;
 	minex_func.f = degreeOfFreedom;
@@ -656,25 +654,10 @@ void PCA(vector<vector<double>>& data, vector<vector<double>>& pc, int n_compone
     // Compute covariance matrix
     MatrixXd covMatrix = (data_mat.transpose() * data_mat) / (data_mat.rows() - 1);
     if (data.size() < 500 && data[0].size() < 500){
-        cout << "Eigen.." << endl;
+        // cout << "Eigen.." << endl;
         // Perform eigendecomposition
         Eigen::EigenSolver<MatrixXd> solver(covMatrix);
         VectorXd eigenvalues = solver.eigenvalues().real();
-
-        // VectorXd explained_variance_ratio = eigenvalues / eigenvalues.sum();
-        // VectorXd cumulative_variance(explained_variance_ratio.size());
-        // double sum = 0.0;
-        // for (int i = 0; i < explained_variance_ratio.size(); ++i) {
-        //     sum += explained_variance_ratio(i);
-        //     cumulative_variance(i) = sum;
-        // }
-        // // Find the optimal number of components
-        // int optimal_components = 0;
-        // while (optimal_components < cumulative_variance.size() &&
-        //        cumulative_variance[optimal_components] < cumulative_variance_threshold) {
-        //     optimal_components++;
-        // }
-        // cout << "Optimal components: " << optimal_components << endl;
         MatrixXd eigenvectors = solver.eigenvectors().real();
         eigenvectors = eigenvectors.leftCols(n_components);
         pc = eigenMatrixToVectorOfVectors(eigenvectors);
@@ -683,28 +666,6 @@ void PCA(vector<vector<double>>& data, vector<vector<double>>& pc, int n_compone
         cout << "Randomized" << endl;
         Eigen::JacobiSVD<MatrixXd> svd(covMatrix, Eigen::ComputeThinU | Eigen::ComputeThinV);
         VectorXd singularValues = svd.singularValues();
-        // reverse(singularValues.data(), singularValues.data() + singularValues.size()); // Reverse the singular values
-        // cout << singularValues(0) << ", " <<singularValues(1) << ", " << singularValues(2) << endl;
-        // VectorXd explained_variance_svd = singularValues.array().square() / (singularValues.size() - 1);
-        // double total_var_svd = explained_variance_svd.sum();
-        // VectorXd explained_variance_ratio_svd = explained_variance_svd / total_var_svd;
-        // // VectorXd explained_variance_ratio_svd = singularValues.array().square() / (singularValues.array().square().sum());
-
-        // VectorXd cumulative_variance_svd(explained_variance_ratio_svd.size());
-        // double sum = 0.0;
-        // for (int i = 0; i < explained_variance_ratio_svd.size(); ++i) {
-        //     sum += explained_variance_ratio_svd(i);
-        //     cumulative_variance_svd(i) = sum;
-        // }
-        // // Find the optimal number of components for SVD
-        // int optimal_components_svd = 0;
-        // while (optimal_components_svd < cumulative_variance_svd.size() &&
-        //        cumulative_variance_svd[optimal_components_svd] < cumulative_variance_threshold) {
-        //     optimal_components_svd++;
-        // }
-        // if (optimal_components_svd == 0){
-        //     optimal_components_svd = 1;
-        // }
         MatrixXd u_copy = svd.matrixU();
         MatrixXd v_copy = svd.matrixV();
         svd_flip(u_copy, v_copy, true);
@@ -771,33 +732,9 @@ double center_normalize_vec(vector<double>& row) {
 
     return row_variance;
 }
-
-// template <typename T>
-// void writematrixToTSV(const vector<vector<T>>& data, const string& name)
-// {
-//     string filename = "/gpfs/commons/groups/gursoy_lab/aychoi/eqtl/mpc/securesort/output/" + name  + ".tsv";
-//     ofstream file(filename);
-//     if (file.is_open())
-//     {
-//         for (int i = 0; i < data.size(); ++i)
-//         {
-//             for (const T& value : data[i])
-//             {
-//                 file << value << "\t";
-//             }
-//             file << std::endl;
-//         }
-//         file.close();
-//         cout << string(name+" matrix successfully written to TSV file.") << endl;
-//     }
-//     else
-//     {
-//         cout << "Error opening the file." << endl;
-//     }
-// } 
 void writeNormalizedToTSV(const vector<vector<double>>& data, const vector<string>& gene_strings, const string& name)
 {
-    string filename = "/gpfs/commons/groups/gursoy_lab/aychoi/eqtl/mpc/securesort/output/" + name  + ".tsv";
+    string filename = name  + ".tsv";
     ofstream file(filename);
     if (file.is_open())
     {

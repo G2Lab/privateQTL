@@ -8,7 +8,7 @@
 struct rusage r_usage;
 
 
-void dataclient(string pheno_path, string split_set, int sendport1, int recvport1, string address1, int sendport2, int recvport2, string address2, int sendport3, int recvport3, string address3,int rowstart, int rowend, int permut)
+void dataclient(string pheno_path, string geno_path, string pheno_pos, string geno_pos, int sendport1, int recvport1, string address1, int sendport2, int recvport2, string address2, int sendport3, int recvport3, string address3,int rowstart, int rowend, int permut)
 {
     IOService ios;
     Endpoint epsend1(ios, address1, sendport1, EpMode::Server);
@@ -36,24 +36,23 @@ void dataclient(string pheno_path, string split_set, int sendport1, int recvport
 
     vector<vector<int64_t>> geno_scaled;
     vector<double> geno_var;
-    
     // string pheno_pos = "/gpfs/commons/groups/gursoy_lab/aychoi/eqtl/rnaseq/data/bed_template.tsv"; //gtex
     // string pheno_pos = "/gpfs/commons/groups/gursoy_lab/ykim/QTL_proj/run2/phenotype/data/stableID_bed_template_v26.tsv"; // run2 gmg 
-    string pheno_pos = "/gpfs/commons/groups/gursoy_lab/ykim/QTL_proj/run2/phenotype/data/stableID_bed_template_v26_reindexed.tsv"; //run2 testing
+    // string pheno_pos = "/gpfs/commons/groups/gursoy_lab/ykim/QTL_proj/run2/phenotype/data/stableID_bed_template_v26_reindexed.tsv"; //run2 testing
     // string geno_matrix = "/gpfs/commons/groups/gursoy_lab/aychoi/eqtl/rnaseq/data/blood/GTEx_v8_blood_WGS_genotype.tsv";
     // string geno_matrix = "/gpfs/commons/groups/gursoy_lab/aychoi/eqtl/rnaseq/data/blood/GTEx_v8_blood_WGS_genotype_1kGresidualized.tsv";
     // string geno_matrix = "/gpfs/commons/groups/gursoy_lab/ykim/QTL_proj/run/data/genotype/re/genotype_imputed_projected_residualized_" + split_set +"_concatenated.tsv"; // scn1 and scn2 projected matrix
     // string geno_matrix = "/gpfs/commons/groups/gursoy_lab/ykim/QTL_proj/run/script2/time_measure/data/projected_200_concatenated.tsv"; // For sample size testing
-    string geno_matrix = "/gpfs/commons/groups/gursoy_lab/ykim/QTL_proj/run2/genotype/data/genotype_projected_residualized_concatenated_gmg.tsv"; //run2 scenario1 and 2 projected, residualized, concatenated
+    // string geno_matrix = "/gpfs/commons/groups/gursoy_lab/ykim/QTL_proj/run2/genotype/data/genotype_projected_residualized_concatenated_gmg.tsv"; //run2 scenario1 and 2 projected, residualized, concatenated
     // string geno_matrix = "/gpfs/commons/groups/gursoy_lab/ykim/QTL_proj/run2/genotype/data/GOLD_concat_pca_residualized.tsv"; //run2 gold genotype for testing
     
     // string geno_pos = "/gpfs/commons/groups/gursoy_lab/aychoi/eqtl/rnaseq/data/blood/GTEx_v8_blood_WGS_variant.tsv"; //for just GTEx
     // string geno_pos = "/gpfs/commons/groups/gursoy_lab/ykim/QTL_proj/covariates/1KGP_data/genotype_check/remapped_1KGP_variants.tsv"; //for run2 gmg
-    string geno_pos = "/gpfs/commons/groups/gursoy_lab/ykim/QTL_proj/covariates/1KGP_data/genotype_check/remapped_1KGP_variants_reindexed.tsv"; //for run2 gmg
+    // string geno_pos = "/gpfs/commons/groups/gursoy_lab/ykim/QTL_proj/covariates/1KGP_data/genotype_check/remapped_1KGP_variants_reindexed.tsv"; //for run2 gmg
   
     cout << "Loading Genotype matrix..." << flush;
     auto loadgeno = chrono::high_resolution_clock::now();
-    prepareInput testinput(pheno_pos, geno_matrix,geno_pos,1000000);
+    prepareInput testinput(pheno_pos, geno_path ,geno_pos,1000000);
     auto loadend = chrono::high_resolution_clock::now();
     chrono::duration<double> duration = loadend - loadgeno;
     double durationInSeconds = duration.count();
@@ -104,7 +103,6 @@ void dataclient(string pheno_path, string split_set, int sendport1, int recvport
         }
         double bed_var = variance /(norm_pheno.size() - 1);
         /***CENTER AND NORMALIZE VEC**/
-        // writeVectorToTSV(norm_pheno, string("pQTL_row_"+to_string(r)+"_pheno_postcentering"));
         vector<int64_t> pheno = ScaleVector_signed(norm_pheno, pow(10,6)); // integer version of secret CHANGE
         
         cout << string("row ") + to_string(r) + string(" ") + geneID + string(" bed file phenotype var: "+to_string(bed_var)+" and phenotype length: ") << pheno.size()<< endl;;
@@ -234,7 +232,6 @@ void dataclient(string pheno_path, string split_set, int sendport1, int recvport
             serializedvariants += str + ";"; // Use a suitable delimiter
         }
         int estimatedSize = static_cast<int>(serializedvariants.size());
-        // int safetyMargin = 128; // Adjust this based on your needs
         int bufferSize = estimatedSize;
         // Send the serialized data over the channel
         owner_p1.send(bufferSize);
@@ -273,29 +270,29 @@ vector<ZZ_p> convert(vector<int> input)
     }
     return output;
 }
-void runMPC(string pheno_path, int pid,  string ownerIP, int ownerPort, int toOwnerPort,  string address1, int recPort1, int sendPort1, string address2, int recPort2, int sendPort2,int rowstart, int rowend, int permut, Logger& cisLogger, Logger& nominalLogger) //, atomic<int>& readyCounter, mutex& mtx, condition_variable& cv)
+void runMPC(int pid,  string ownerIP, int ownerPort, int toOwnerPort,  string address1, int recPort1, int sendPort1, string address2, int recPort2, int sendPort2,int rowstart, int rowend, int permut, Logger& cisLogger, Logger& nominalLogger) //, atomic<int>& readyCounter, mutex& mtx, condition_variable& cv)
 {    
-    mpc testmpc;
-    testmpc.initialize(pid, ownerIP, ownerPort, toOwnerPort, address1, recPort1, sendPort1, address2, recPort2, sendPort2);
+    mpc CP_i;
+    CP_i.initialize(pid, ownerIP, ownerPort, toOwnerPort, address1, recPort1, sendPort1, address2, recPort2, sendPort2);
     auto invcdf_start = chrono::high_resolution_clock::now();
     for (int row=rowstart; row<rowend; row++)
     {
-        int returned = testmpc.validgene(); 
+        int returned = CP_i.validgene(); 
         if (returned != 0){
             continue;
         }
-        testmpc.center_normalize_pheno();
-        testmpc.center_normalize_geno();
-        testmpc.permutPheno(permut);
-        testmpc.receiveGeno();
-        testmpc.calc_corr(cisLogger, nominalLogger);
-        testmpc.clearVectors();
+        CP_i.center_normalize_pheno();
+        CP_i.center_normalize_geno();
+        CP_i.permutPheno(permut);
+        CP_i.receiveGeno();
+        CP_i.calc_corr(cisLogger, nominalLogger);
+        CP_i.clearVectors();
     }
     auto invcdf_end = chrono::high_resolution_clock::now();
     chrono::duration<double> duration = invcdf_end - invcdf_start;
     double durationInSeconds = duration.count();
     double durationInminutes = durationInSeconds/60.0;
-    testmpc.close();
+    CP_i.close();
 }
 void setThreadAffinity(std::thread& thread, int coreId)
 {
@@ -326,31 +323,31 @@ bool isPortOpen(int port) {
     close(sockfd);
     return true;
 }
-void startMPCset(string pheno_path, string split_set, vector<int>& availPorts, int startidx, vector<string>& address, int startrow, int endrow, int CPU_core, int permut, Logger& cislogger, Logger& nominalLogger)
+void startMPCset(string pheno_path, string geno_path, string pheno_pos, string geno_pos,vector<int>& availPorts, int startidx, vector<string>& address, int startrow, int endrow, int CPU_core, int permut, Logger& cislogger, Logger& nominalLogger)
 {
     vector<thread> threads;
-    thread dataClientThread(dataclient, pheno_path, split_set, availPorts[startidx + 6], availPorts[startidx + 9], address[1], availPorts[startidx + 7], availPorts[startidx + 10], address[2], 
+    thread dataClientThread(dataclient, pheno_path, geno_path, pheno_pos, geno_pos, availPorts[startidx + 6], availPorts[startidx + 9], address[1], availPorts[startidx + 7], availPorts[startidx + 10], address[2], 
     availPorts[startidx + 8], availPorts[startidx + 11], address[3], startrow, endrow, permut);
     setThreadAffinity(dataClientThread,CPU_core+0);
     threads.emplace_back(move(dataClientThread));
 
     // int startidx1 = startidx;
     thread runMPC1([=, &cislogger, &nominalLogger]() {
-        runMPC(pheno_path, 0, address[0], availPorts[startidx + 6], availPorts[startidx + 9], address[2], availPorts[startidx + 0], availPorts[startidx + 2], address[3], availPorts[startidx + 1], availPorts[startidx + 4], 
+        runMPC(0, address[0], availPorts[startidx + 6], availPorts[startidx + 9], address[2], availPorts[startidx + 0], availPorts[startidx + 2], address[3], availPorts[startidx + 1], availPorts[startidx + 4], 
         startrow, endrow, permut,cislogger,nominalLogger);
     });
     setThreadAffinity(runMPC1,CPU_core+1);
     threads.emplace_back(move(runMPC1));
 
     thread runMPC2([=, &cislogger,&nominalLogger]() {
-        runMPC(pheno_path, 1, address[0], availPorts[startidx + 7], availPorts[startidx + 10], address[3], availPorts[startidx + 3], availPorts[startidx + 5], address[1], availPorts[startidx + 2], availPorts[startidx + 0], 
+        runMPC(1, address[0], availPorts[startidx + 7], availPorts[startidx + 10], address[3], availPorts[startidx + 3], availPorts[startidx + 5], address[1], availPorts[startidx + 2], availPorts[startidx + 0], 
         startrow, endrow,permut,cislogger,nominalLogger);
     });
     setThreadAffinity(runMPC2,CPU_core+2);
     threads.emplace_back(move(runMPC2));
 
     thread runMPC3([=, &cislogger,&nominalLogger]() {
-        runMPC(pheno_path, 2, address[0], availPorts[startidx + 8], availPorts[startidx + 11], address[1], availPorts[startidx + 4], availPorts[startidx + 1], address[2], availPorts[startidx + 5], availPorts[startidx + 3], 
+        runMPC(2, address[0], availPorts[startidx + 8], availPorts[startidx + 11], address[1], availPorts[startidx + 4], availPorts[startidx + 1], address[2], availPorts[startidx + 5], availPorts[startidx + 3], 
         startrow, endrow, permut,cislogger,nominalLogger);
     });
     setThreadAffinity(runMPC3,CPU_core+2);
@@ -373,9 +370,11 @@ int main(int argc, char* argv[])
     int permut = stoi(argv[4]);
     // string zscorefile = argv[5]; // don't need zscores for scenario1
     string pheno_path = argv[5];
-    string split_set = argv[6];
-    string cis_log = argv[7];
-    string nominal_log = argv[8];
+    string geno_path = argv[6];
+    string pheno_pos= argv[7];
+    string geno_pos = argv[8];
+    string cis_log = argv[9];
+    string nominal_log = argv[10];
     int startingPort = 12300;
     int assignedPorts=0;
     vector<int> openPorts;
@@ -394,19 +393,19 @@ int main(int argc, char* argv[])
     auto start = chrono::high_resolution_clock::now();
     int numCores = thread::hardware_concurrency();
     vector<thread> threads;
-    string nominal = string("/gpfs/commons/groups/gursoy_lab/aychoi/eqtl/rnaseq/data/blood/output/" + split_set + "/privateQTL_scenario1_"+split_set+"_"+nominal_log);
-    string cis = string("/gpfs/commons/groups/gursoy_lab/aychoi/eqtl/rnaseq/data/blood/output/" + split_set + "/privateQTL_scenario1_"+split_set+"_"+cis_log);
-    Logger nominallogger(nominal+"_"+to_string(lo_row)+"_"+to_string(mid_row)+".tsv"), cislogger(cis+"_"+to_string(lo_row)+"_"+to_string(mid_row)+".tsv");
-    Logger nominallogger2(nominal+"_"+to_string(mid_row)+"_"+to_string(hi_row)+".tsv"),cislogger2(cis+"_"+to_string(mid_row)+"_"+to_string(hi_row)+".tsv");
+    // string nominal = string("/gpfs/commons/groups/gursoy_lab/aychoi/eqtl/rnaseq/data/blood/output/" + split_set + "/privateQTL_scenario1_"+split_set+"_"+nominal_log);
+    // string cis = string("/gpfs/commons/groups/gursoy_lab/aychoi/eqtl/rnaseq/data/blood/output/" + split_set + "/privateQTL_scenario1_"+split_set+"_"+cis_log);
+    Logger nominallogger(nominal_log+"_"+to_string(lo_row)+"_"+to_string(mid_row)+".tsv"),  cislogger(cis_log+"_"+to_string(lo_row)+"_"+to_string(mid_row)+".tsv");
+    Logger nominallogger2(nominal_log+"_"+to_string(mid_row)+"_"+to_string(hi_row)+".tsv"), cislogger2(cis_log+"_"+to_string(mid_row)+"_"+to_string(hi_row)+".tsv");
     nominallogger.log(string("phenID\tvarID\tvarIdx\tdof\tr_nom\tr2_nom\ttstat\tpval\tslope\tslope_se"));
     cislogger.log(string("phenID\tvarID\tvarIdx\tbeta_shape1\tbeta_shape2\ttrue_dof\tpval_true_df\tr_nom\tr2_nom\ttstat\tpval_nominal\tslope\tslope_se\tpval_perm\tpval_beta"));
     nominallogger2.log(string("phenID\tvarID\tvarIdx\tdof\tr_nom\tr2_nom\ttstat\tpval\tslope\tslope_se"));
     cislogger2.log(string("phenID\tvarID\tvarIdx\tbeta_shape1\tbeta_shape2\ttrue_dof\tpval_true_df\tr_nom\tr2_nom\ttstat\tpval_nominal\tslope\tslope_se\tpval_perm\tpval_beta"));
     thread thread1([&]() {
-        startMPCset(pheno_path, split_set, openPorts, 0, address, lo_row, mid_row, 0,permut,cislogger,nominallogger);
+        startMPCset(pheno_path, geno_path, pheno_pos, geno_pos, openPorts, 0, address, lo_row, mid_row, 0,permut,cislogger,nominallogger);
     });
     thread thread2([&]() {
-        startMPCset(pheno_path, split_set, openPorts, 12, address, mid_row, hi_row, 0, permut,cislogger2,nominallogger2);
+        startMPCset(pheno_path, geno_path, pheno_pos, geno_pos, openPorts, 12, address, mid_row, hi_row, 0, permut,cislogger2,nominallogger2);
     });
 
     threads.emplace_back(move(thread1));

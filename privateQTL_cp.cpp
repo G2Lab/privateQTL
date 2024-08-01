@@ -1,7 +1,7 @@
 #include "privateQTL_cp.h"
 
 const static Eigen::IOFormat TSVFormat(Eigen::StreamPrecision, Eigen::DontAlignCols, "\t", "\n");
-
+ 
 void mpc::writeEigenToTSV(Eigen::Matrix <double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>& mat, const string& name)
 {
     string filename = "/gpfs/commons/groups/gursoy_lab/aychoi/eqtl/mpc/securesort/output/" + name + ".tsv";

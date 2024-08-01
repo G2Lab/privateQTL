@@ -27,14 +27,17 @@ make
 ## Running privateQTL
 privateQTL-I and II shares eQTL mapping code, that takes in secretly shared genotype and phenotype and performs matrix multiplication. privateQTL-II requires additional phenotype preprocessing code in MPC. 
 ### privateQTL-I: private genotype, public phenotype
-privateQTL-I assumes phenotype is publicly available and therefore preprocessing is completed in plaintext. It takes in genotype that has been locally projected onto reference PCs and residualized, and fully preprocessed phenotype from each data owner. It is run on a per-gene basis, and can run two gene ranges in parallel (start-middle, middle-end). Please run as the following.
+privateQTL-I assumes phenotype is publicly available and therefore preprocessing is completed in plaintext. It takes in genotype that has been locally projected onto reference PCs and residualized, and fully preprocessed phenotype from each data owner. It is run on a per-gene basis, and can run two gene ranges in parallel (start-middle, middle-end). It takes in the file path for genotype and phenotype, as well as position matrices for indexing. Please run as the following.
 ```sh
-./eqtl_mapping [start_gene_index] [middle_gene_index] [end_gene_index] [num_permutations] [pheno_file_path] [data_split_set] [cis_output_prefix] [nominal_output_prefix]
+./eqtl_mapping [start_gene_index] [middle_gene_index] [end_gene_index] [num_permutations] [pheno_file_path] [geno_file_path] [pheno_pos] [geno_pos][cis_output_prefix] [nominal_output_prefix]
 ```
 
 ### privateQTL-II: private genotype, private phenotype
-privateQTL-II assumes phenotypes are also private, and requires additional MPC phenotype preprocessing. It takes in two ranges of gene indices to run in parallel, pre-computed zscore file with total number of samples across sites, normalization method, and split set. Please run as the following.
+privateQTL-II assumes phenotypes are also private, and requires additional MPC phenotype preprocessing. It takes in two ranges of gene indices to run in parallel, pre-computed zscore file with total number of samples across sites, normalization method, output file path, and number of samples in each site. Please run as the following.
 ```sh
-./preprocessing [start_gene_index] [middle_gene_index] [end_gene_index] [zscores_file] [normalization] [split_set]
+./preprocessing [start_gene_index] [middle_gene_index] [end_gene_index] [pheno_input][zscores_file] [normalization] [output_path] [siteA_n] [siteB_n] [siteC_n]
 ```
 Once the preprocessing has finished, eQTL mapping can be run in the same way as privateQTL-I. 
+
+## Test running from example dataset from GEUVADIS
+For convenience, we have provided a toy dataset from the GEUVADIS dataset consisting of 30 samples. Please feel free to test both privateQTL versions. Please note that smaller samples sizes means lower accuracy for privateQTL-II MPC preprocessing. 

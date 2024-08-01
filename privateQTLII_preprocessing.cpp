@@ -74,7 +74,7 @@ vector<vector<double>> deseq2_cpm(vector<vector<uint64_t>>& counts_df) {
     return cpm_df;
 }
 
-void dataclient(string norm_method, string split_set, int sendport1, int recvport1, string address1, int sendport2, int recvport2, string address2, int sendport3, int recvport3, string address3,int rowstart, int rowend,string zscorefile, vector<vector<double>>& resultVec, vector<string>& gene_string)
+void dataclient(string norm_method, string pheno_input, int sendport1, int recvport1, string address1, int sendport2, int recvport2, string address2, int sendport3, int recvport3, string address3,int rowstart, int rowend,string zscorefile, vector<vector<double>>& resultVec, vector<string>& gene_string)
 {
     IOService ios;
     Endpoint epsend1(ios, address1, sendport1, EpMode::Server);
@@ -104,8 +104,8 @@ void dataclient(string norm_method, string split_set, int sendport1, int recvpor
     {
         cout << "Quantile Normalization executing... " << flush;
         // string matched = "/gpfs/commons/groups/gursoy_lab/aychoi/eqtl/rnaseq/data/blood/blood_tpm_matched_filtered.tsv"; //original
-        string matched = "/gpfs/commons/groups/gursoy_lab/aychoi/eqtl/rnaseq/data/blood/blood_tpm_matched_filtered_" + split_set + ".tsv";
-        pheno = getTPMFromMatrixFile(matched, geneID);
+        // string matched = "/gpfs/commons/groups/gursoy_lab/aychoi/eqtl/rnaseq/data/blood/blood_tpm_matched_filtered_" + split_set + ".tsv";
+        pheno = getTPMFromMatrixFile(pheno_input, geneID);
         // print_vector(testss);
         vector<vector<size_t>> rank(pheno[0].size(), vector<size_t>(pheno.size()));
         vector<double> quantiles =get_quantiles(pheno, rank);
@@ -121,8 +121,8 @@ void dataclient(string norm_method, string split_set, int sendport1, int recvpor
         cout << "Deseq2 normalization executing... ";
         // string matched = "/gpfs/commons/groups/gursoy_lab/aychoi/eqtl/rnaseq/data/blood/blood_reads_matched_filtered.tsv"; // original order
         // string matched = "/gpfs/commons/groups/gursoy_lab/aychoi/eqtl/rnaseq/data/blood/blood_reads_matched_filtered_" + split_set + ".tsv"; // for just GTEx, skip 2 columns
-        string matched = "/gpfs/commons/groups/gursoy_lab/ykim/QTL_proj/run2/phenotype/data/all_match_filtered_read_counts_700.tsv"; // for GTEx, geuvadis, mage
-        vector<vector<uint64_t>> testp = getCountFromMatrixFile(matched,geneID,1);
+        // string matched = "/gpfs/commons/groups/gursoy_lab/ykim/QTL_proj/run2/phenotype/data/all_match_filtered_read_counts_700.tsv"; // for GTEx, geuvadis, mage
+        vector<vector<uint64_t>> testp = getCountFromMatrixFile(pheno_input,geneID,1);
 
         vector<vector<double>> cpm_df = deseq2_cpm(testp); ///CHANGE TO testp
 
@@ -238,8 +238,6 @@ void dataclient(string norm_method, string split_set, int sendport1, int recvpor
         throw invalid_argument("Please choose normalization method between qn and deseq2.\n");
     }
 
-    vector<vector<int64_t>> geno_scaled;
-    vector<double> geno_var, pheno_var;
     for (int r=rowstart; r<rowend; r++)
     {
         if (r >= pheno.size())
@@ -258,7 +256,7 @@ void dataclient(string norm_method, string split_set, int sendport1, int recvpor
         
         if ((ready1 == 1) && (ready2 ==1) && (ready3==1))
         {
-            cout << "Client will send one phenotype\n";
+            // cout << "Client will send one phenotype\n";
             vector<BitVector> bitInput;
 
             
@@ -268,11 +266,11 @@ void dataclient(string norm_method, string split_set, int sendport1, int recvpor
 
             
             /// ZSCORE FILE
-            string zscore_filename = string("/gpfs/commons/groups/gursoy_lab/aychoi/eqtl/rnaseq/data/blood/"+zscorefile+".txt");
-            string original = string("/gpfs/commons/groups/gursoy_lab/aychoi/eqtl/rnaseq/data/blood/zscores.txt");
-            vector<double> zscore_input = CSVtoVector(zscore_filename);
-            vector<double> pre_centered = CSVtoVector(original);
-            double pheno_var =doublevariance(pre_centered, doublemean(pre_centered));//0.9782648500530864;// 0.9596748533543238; //TODO::Don't put manual numbers here 
+            // string zscore_filename = string("/gpfs/commons/groups/gursoy_lab/aychoi/eqtl/rnaseq/data/blood/"+zscorefile+".txt");
+            // string original = string("/gpfs/commons/groups/gursoy_lab/aychoi/eqtl/rnaseq/data/blood/zscores.txt");
+            vector<double> zscore_input = CSVtoVector(zscorefile);
+            // vector<double> pre_centered = CSVtoVector(original);
+            // double pheno_var =doublevariance(pre_centered, doublemean(pre_centered));//0.9782648500530864;// 0.9596748533543238; //TODO::Don't put manual numbers here 
 
             auto min = min_element(zscore_input.begin(), zscore_input.end()); // CHANGE to zscore_input
             double shiftsize = abs(*min);
@@ -317,7 +315,7 @@ void dataclient(string norm_method, string split_set, int sendport1, int recvpor
             p3_owner.recv(prelim3);
             if ((prelim1 == 1) && (prelim1 ==1) && (prelim1==1))
             {
-                cout << "Client will share zscore and identity.\n";
+                // cout << "Client will share zscore and identity.\n";
 
                 vector<vector<uint64_t>> identity_shares;
                 for (int i = 0; i < 3; i++) {
@@ -483,11 +481,11 @@ bool isPortOpen(int port) {
     close(sockfd);
     return true;
 }
-void startMPCset(string norm_method, string split_set, vector<int>& availPorts, int startidx, vector<string>& address, int startrow, int endrow, string zscorefile, int CPU_core, vector<vector<double>>& resultVec, vector<string>& gene_string)
+void startMPCset(string norm_method, string pheno_input, vector<int>& availPorts, int startidx, vector<string>& address, int startrow, int endrow, string zscorefile, int CPU_core, vector<vector<double>>& resultVec, vector<string>& gene_string)
 {
     vector<thread> threads;
     thread dataClientThread([=,  &resultVec, &gene_string]() {
-        dataclient(norm_method, split_set, availPorts[startidx + 6], availPorts[startidx + 9], address[1], availPorts[startidx + 7], availPorts[startidx + 10], address[2], 
+        dataclient(norm_method, pheno_input, availPorts[startidx + 6], availPorts[startidx + 9], address[1], availPorts[startidx + 7], availPorts[startidx + 10], address[2], 
         availPorts[startidx + 8], availPorts[startidx + 11], address[3], startrow, endrow, zscorefile, resultVec, gene_string);
     });
     setThreadAffinity(dataClientThread,CPU_core+0);
@@ -528,10 +526,13 @@ int main(int argc, char* argv[])
     int lo_row = stoi(argv[1]);
     int mid_row = stoi(argv[2]);
     int hi_row = stoi(argv[3]);
-    string zscorefile = argv[4];
-    string norm_method = argv[5];
-    string split_set = argv[6];
-
+    string pheno_input = argv[4];
+    string zscorefile = argv[5];
+    string norm_method = argv[6];
+    string output_file = argv[7];
+    int siteA_n = stoi(argv[8]);
+    int siteB_n = stoi(argv[9]);
+    int siteC_n = stoi(argv[10]);
 
     int startingPort = 12300;
     int assignedPorts=0;
@@ -554,10 +555,10 @@ int main(int argc, char* argv[])
     vector<vector<double>> resultVec1, resultVec2;
     vector<string> gene_string1, gene_string2;
     thread thread1([&]() {
-        startMPCset(norm_method, split_set, openPorts, 0, address, lo_row, mid_row, zscorefile, 0,resultVec1,gene_string1);
+        startMPCset(norm_method, pheno_input, openPorts, 0, address, lo_row, mid_row, zscorefile, 0,resultVec1,gene_string1);
     });
     thread thread2([&]() {
-        startMPCset(norm_method, split_set, openPorts, 12, address, mid_row, hi_row,zscorefile, 0,resultVec2,gene_string2);
+        startMPCset(norm_method, pheno_input, openPorts, 12, address, mid_row, hi_row,zscorefile, 0,resultVec2,gene_string2);
     });
 
     threads.emplace_back(move(thread1));
@@ -568,23 +569,8 @@ int main(int argc, char* argv[])
     }
     resultVec1.insert(resultVec1.end(), resultVec2.begin(), resultVec2.end());
     gene_string1.insert(gene_string1.end(), gene_string2.begin(), gene_string2.end());
-    writeNormalizedToTSV(resultVec1, gene_string1, "private_deseq2_invcdf_gmg_normalized");
-    
-    int siteA_n;
-    int siteB_n;
-    int siteC_n;
-    if (split_set == "set1") ///CHANGE THIS
-    {
-        siteA_n = 250;//300;
-        siteB_n = 300;//250;
-        siteC_n = 150;//120;
-    }
-    else
-    {
-        siteA_n = 300;
-        siteB_n = 300;
-        siteC_n = 70;
-    }
+    // writeNormalizedToTSV(resultVec1, gene_string1, "private_deseq2_invcdf_gmg_normalized");
+
     vector<vector<double>> siteA(resultVec1.size(), vector<double>(siteA_n));
     vector<vector<double>> siteB(resultVec1.size(), vector<double>(siteB_n));
     vector<vector<double>> siteC(resultVec1.size(), vector<double>(siteC_n));
@@ -610,9 +596,9 @@ int main(int argc, char* argv[])
     cout << "siteA_cov shape: " << siteA_cov.size() << ", " << siteA_cov[0].size() << endl;
     cout << "siteB_cov shape: " << siteB_cov.size() << ", " << siteB_cov[0].size() << endl;
     cout << "siteC_cov shape: " << siteC_cov.size() << ", " << siteC_cov[0].size() << endl;
-    writematrixToTSV(siteA_cov, "private_deseq2_invcdf_gmg_siteA_pc");
-    writematrixToTSV(siteB_cov, "private_deseq2_invcdf_gmg_siteB_pc");
-    writematrixToTSV(siteC_cov, "private_deseq2_invcdf_gmg_siteC_pc");
+    // writematrixToTSV(siteA_cov, "private_deseq2_invcdf_gmg_siteA_pc");
+    // writematrixToTSV(siteB_cov, "private_deseq2_invcdf_gmg_siteB_pc");
+    // writematrixToTSV(siteC_cov, "private_deseq2_invcdf_gmg_siteC_pc");
     Residualizer res1(siteA_cov);
     Residualizer res2(siteB_cov);
     Residualizer res3(siteC_cov);
@@ -624,8 +610,8 @@ int main(int argc, char* argv[])
         res_A[i].insert(res_A[i].end(), res_C[i].begin(), res_C[i].end());
     } 
     cout << "residualized shape: \n" << res_A.size() << ", " << res_A[0].size() <<endl;
-    string to_write = "private_deseq2_invcdf_"+split_set+"_residualized_700"; //CHANGE
-    writeNormalizedToTSV(res_A, gene_string1, to_write);
+    // string to_write = "private_deseq2_invcdf_"+split_set+"_residualized_700"; //CHANGE
+    writeNormalizedToTSV(res_A, gene_string1, output_file);
     auto end = chrono::high_resolution_clock::now();
     chrono::duration<double> totalduration = end - start;
     double totaldurationInSeconds = totalduration.count();

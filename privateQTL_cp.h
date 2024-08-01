@@ -1,6 +1,6 @@
 #ifndef PRIVATEQTL_CP_H
 #define PRIVATEQTL_CP_H
-// #define EIGEN_USE_THREADS
+// #define EIGEN_USE_THREADS 
 #include <cryptoTools/Common/BitVector.h>
 #include <cryptoTools/Crypto/PRNG.h>
 #include <cryptoTools/Network/IOService.h>

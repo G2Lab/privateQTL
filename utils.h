@@ -133,9 +133,9 @@ public:
     Residualizer(const vector<vector<double>>& covariates) {
         // Convert vector of vectors to Eigen matrix
         MatrixXd C_t = vectorOfVectorsToEigenMatrix(covariates);
-        cout << "inside constructor: "<< covariates.size() << ", " << covariates[0].size() << endl;
+        // cout << "inside constructor: "<< covariates.size() << ", " << covariates[0].size() << endl;
         Eigen::VectorXd col_means = C_t.colwise().mean();
-        cout << col_means << endl;
+        // cout << col_means << endl;
         MatrixXd centered_C_t = C_t.rowwise() - col_means.transpose();
         Eigen::HouseholderQR<MatrixXd> qr(centered_C_t);
         // Q_t = qr.householderQ();
@@ -146,13 +146,13 @@ public:
     }
     vector<vector<double>> transform(const vector<vector<double>>& M_t, bool center = true) {
         // Convert vector of vectors to Eigen matrix
-        cout << "start transform function. "<< endl;
+        // cout << "start transform function. "<< endl;
         MatrixXd M_t_matrix = vectorOfVectorsToEigenMatrix(M_t);
         
         // Residualize rows of M wrt columns of C
-        cout << "befpre M0_t" << endl;
+        // cout << "befpre M0_t" << endl;
         MatrixXd M0_t = M_t_matrix.colwise() - M_t_matrix.rowwise().mean();
-        cout << "M0_t made." << endl;
+        // cout << "M0_t made." << endl;
         if (center) {
             M0_t = M0_t - M0_t * Q_t * Q_t.transpose();
         } else {
