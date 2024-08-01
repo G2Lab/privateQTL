@@ -1,7 +1,7 @@
 set(CMAKE_MODULE_PATH "/nfs/sw/modules/cmake/3.26.0")
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_EXTENSIONS OFF) 
 set(cryptoTools_DIR "/gpfs/commons/groups/gursoy_lab/aychoi/eqtl/mpc/cryptoTools/cmake")
 set(Eigen3_DIR "/gpfs/commons/groups/gursoy_lab/aychoi/sw/eigen-3.4.0/include")
 set(NTL_DIR "/gpfs/commons/groups/gursoy_lab/aychoi/sw/NTL")

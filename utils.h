@@ -122,14 +122,14 @@ void writeVectorToTSV(const vector<T>& data, string name)
     {
         cout << "Error opening the file." << endl;
     }
-}
+} 
 vector<vector<double>> getMatrixFile(const string& filename, int startrow, int endrow, bool header, bool index);
 template <typename T>
 void print_vector(vector<vector<T>> printme);
 template <typename T>
 void print_vector(Vec<T> printme);
 class Residualizer {
-public:
+public: 
     Residualizer(const vector<vector<double>>& covariates) {
         // Convert vector of vectors to Eigen matrix
         MatrixXd C_t = vectorOfVectorsToEigenMatrix(covariates);

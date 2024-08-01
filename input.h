@@ -1,6 +1,6 @@
 #ifndef INPUT_H
 #define INPUT_H
-
+ 
 #include <string>
 #include <vector>
 #include <unordered_map>

@@ -794,7 +794,7 @@ double center_normalize_vec(vector<double>& row) {
 //     {
 //         cout << "Error opening the file." << endl;
 //     }
-// }
+// } 
 void writeNormalizedToTSV(const vector<vector<double>>& data, const vector<string>& gene_strings, const string& name)
 {
     string filename = "/gpfs/commons/groups/gursoy_lab/aychoi/eqtl/mpc/securesort/output/" + name  + ".tsv";

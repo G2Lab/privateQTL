@@ -50,7 +50,7 @@ void dataclient(string pheno_path, string split_set, int sendport1, int recvport
     // string geno_pos = "/gpfs/commons/groups/gursoy_lab/aychoi/eqtl/rnaseq/data/blood/GTEx_v8_blood_WGS_variant.tsv"; //for just GTEx
     // string geno_pos = "/gpfs/commons/groups/gursoy_lab/ykim/QTL_proj/covariates/1KGP_data/genotype_check/remapped_1KGP_variants.tsv"; //for run2 gmg
     string geno_pos = "/gpfs/commons/groups/gursoy_lab/ykim/QTL_proj/covariates/1KGP_data/genotype_check/remapped_1KGP_variants_reindexed.tsv"; //for run2 gmg
- 
+  
     cout << "Loading Genotype matrix..." << flush;
     auto loadgeno = chrono::high_resolution_clock::now();
     prepareInput testinput(pheno_pos, geno_matrix,geno_pos,1000000);

@@ -37,4 +37,4 @@ privateQTL-II assumes phenotypes are also private, and requires additional MPC p
 ```sh
 ./preprocessing [start_gene_index] [middle_gene_index] [end_gene_index] [zscores_file] [normalization] [split_set]
 ```
-Once the preprocessing has finished, eQTL mapping can be run in the same way as privateQTL-I.
+Once the preprocessing has finished, eQTL mapping can be run in the same way as privateQTL-I. 

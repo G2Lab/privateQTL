@@ -37,7 +37,7 @@ void getGenotype(const string& filename, vector<vector<double>>& geno, vector<st
 
     swap(geno, rowsData);
 }
-
+ 
 // gene positions
 unordered_map<string, GeneData> readDataFile(string& filename) {
     unordered_map<string, GeneData> geneMap;

@@ -622,7 +622,7 @@ int main(int argc, char* argv[])
     for (int i = 0; i < res_A.size(); ++i) {
         res_A[i].insert(res_A[i].end(), res_B[i].begin(), res_B[i].end());
         res_A[i].insert(res_A[i].end(), res_C[i].begin(), res_C[i].end());
-    }
+    } 
     cout << "residualized shape: \n" << res_A.size() << ", " << res_A[0].size() <<endl;
     string to_write = "private_deseq2_invcdf_"+split_set+"_residualized_700"; //CHANGE
     writeNormalizedToTSV(res_A, gene_string1, to_write);
