@@ -150,6 +150,7 @@ void read_bedfile_row(vector<double>& rowData, string& geneID, const string& fil
                 rowData.push_back(entry);
                 }
                 catch (const exception& e) {
+                    cout << "in bed file read" << endl;
                     cerr << "Exception caught: " << e.what() << std::endl;
                 }
                 currentColumn++;

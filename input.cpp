@@ -26,6 +26,7 @@ void getGenotype(const string& filename, vector<vector<double>>& geno, vector<st
                 double entry = stod(cell);
                 rowVector.push_back(entry);
             } catch (const exception& e) {
+                cout << "Error in getgenotype" << endl;
                 cerr << "Exception caught: " << e.what() << endl;
             }
         }
