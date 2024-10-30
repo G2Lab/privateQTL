@@ -103,12 +103,7 @@ string prepareInput::getCisRange(string geneID, vector<uint64_t>& positions)
     return geneData.chr;
 }
 vector<uint64_t> prepareInput::getSNPrange(uint64_t start, uint64_t end, string chrnum, vector<string>& cisSnpIds)
-{ 
-    // cout << "getSNPrange.." << endl;
-    // cout << "start " << start << endl;
-    // cout << "end " << end << endl;
-    // cout << "chrnum '" << chrnum << "'" << endl; 
-    
+{     
     // get snp indices that fall within range
     vector<uint64_t> indices;
     auto lb_it = lower_bound(snpPos.begin(), snpPos.end(), static_cast<int64_t>(start) - static_cast<int64_t>(ciswindow));
@@ -120,10 +115,6 @@ vector<uint64_t> prepareInput::getSNPrange(uint64_t start, uint64_t end, string 
     // Get the actual upper bound value in snpPos vector
     uint64_t upper_bound_value = (ub_it != snpPos.end()) ? *ub_it : *max_element(snpPos.begin(), snpPos.end());
     for (size_t i = 0; i < geno.size(); ++i) {
-        // if (snpChr[i] == chrnum && snpPos[i] >= lower_bound_value && snpPos[i] <= upper_bound_value) {
-        //     indices.push_back(i);
-        //     cisSnpIds.push_back(snpIDs[i]);
-        // }
         int64_t cisdistance = snpPos[i] - start;
         if(abs(cisdistance)<=ciswindow && snpChr[i] == chrnum)
         {
@@ -131,15 +122,7 @@ vector<uint64_t> prepareInput::getSNPrange(uint64_t start, uint64_t end, string 
             cisSnpIds.push_back(snpIDs[i]);
         }
     }
-    // for (auto it = lb_it; it != ub_it; ++it) {
-    //     uint64_t i = static_cast<uint64_t>(distance(snpPos.begin(), it));
-    //     if (typeid(snpChr[i]).name() != typeid(std::string).name())
-    //         throw invalid_argument("wrong data type.");
-    //     if (snpChr[i] == chrnum) {
-    //         indices.push_back(i);
-    //     }
-    // }
-    // cout << string("Number of snps in cis range "+to_string(start)+"-"+to_string(end)+": "+to_string(indices.size())+"\n");
+
     cout << "done." << endl;
     return indices;
 }
@@ -160,19 +143,6 @@ int prepareInput::sliceGeno(vector<uint64_t> positions, string& chr, int64_t mis
     {
         for (uint64_t index : idx)
         {   
-            // cout << "index " << index << endl;
-            // cout << "geno[index] " << geno[index].size() << endl;
-            
-
-            // if (head < 5)
-            // {
-            //     cout <<string("index: "+to_string(index)+"\t>>"+to_string(geno[index][0])+", "+to_string(geno[index][1])+", "+to_string(geno[index][2])+", "+to_string(geno[index][3])+", "+to_string(geno[index][4])+"\n");
-            //     head++;
-            // }
-
-
-            // cout << string("index: "+ to_string(index));
-
             int sum = 0;
             vector<int> missing_idx;
             for (int j=0; j < geno[index].size(); j++)
@@ -190,12 +160,9 @@ int prepareInput::sliceGeno(vector<uint64_t> positions, string& chr, int64_t mis
             {
                 geno[index][missing_idx[i]] = avg;
             }
-            // cout << "slicedmatrix " << slicedmatrix.size() << endl;
             slicedmatrix.push_back(geno[index]);
         }
         cout << "slicing complete\n";
-        // TODO: SEGFAULT OCCURS BECAUSE SLICEDMATRIX.SIZE() == 0
-        // cout << "slicedmatrix size" << to_string(slicedmatrix.size()) << "\n";
         return 0;
     }
     // int head = 0;

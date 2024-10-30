@@ -53,6 +53,10 @@ bool mpc::initialize(int pid, string ownerIP, int ownerPort, int toOwnerPort, st
         cout << "PRNG setup failed.\n";
     }
     this->dataowner.recv(this->p);
+    if (this->pid == 0){
+        cout << "P: " << this->p << endl;
+    }
+    
     ZZ_p::init(to_ZZ(this->p));
     this->p = p;
     return true;
@@ -72,7 +76,7 @@ bool mpc::setupChannels(string ownerIP, int ownerPort, int toOwnerPort, string a
     this->fromMinus = eprec2.addChannel();
     this->toPlus = epsend1.addChannel();
     this->toMinus = epsend2.addChannel();
-    cout << "Established channels with the computing parties and data owner.\n";
+    // cout << "Established channels with the computing parties and data owner.\n";
     p_owner.stop();
     ownersend.stop();
     eprec1.stop();
@@ -806,6 +810,73 @@ void mpc::reveal_matrix(vector<vector<ZZ_p>>& geno, vector<vector<ZZ_p>>& pheno,
     }
         
 }
+vector<string> intersect_vectors(const vector<string>& one,
+                                                 const vector<string>& two,
+                                                 const vector<string>& three) {
+    // Sort the vectors to prepare for set intersection
+    vector<string> sorted_one = one;
+    vector<string> sorted_two = two;
+    vector<string> sorted_three = three;
+    sort(sorted_one.begin(), sorted_one.end());
+    sort(sorted_two.begin(), sorted_two.end());
+    sort(sorted_three.begin(), sorted_three.end());
+    // Get the intersection of gene1 and gene2
+    vector<string> temp_intersection;
+    std::set_intersection(sorted_one.begin(), sorted_one.end(),
+                          sorted_two.begin(), sorted_two.end(),
+                          back_inserter(temp_intersection));
+    // Get the intersection of temp_intersection with gene3
+    vector<string> final_intersection;
+    std::set_intersection(temp_intersection.begin(), temp_intersection.end(),
+                          sorted_three.begin(), sorted_three.end(),
+                          back_inserter(final_intersection));
+    return final_intersection;
+}
+void mpc::recv_string(vector<string>& stringvec)
+{
+    // this->dataowner.recv(snps);
+    int buffersize;
+    this->dataowner.recv(buffersize);
+    cout <<"mpc received buffer size" << endl;
+    vector<char> buffer(buffersize);
+    this->dataowner.recv(buffer.data(), buffersize);
+    cout <<"mpc received buffer" << endl;
+    string serializedVar(buffer.data(), buffersize);
+    // vector<string> cisVar;
+    istringstream iss(serializedVar);
+    string token;
+    while (getline(iss, token, ';')) {
+        stringvec.push_back(token);
+    }
+}
+void mpc::send_string(vector<string>& tosend)
+{
+    string serializedvariants="";
+    for (const std::string& str : tosend) {
+        serializedvariants += str + ";"; // Use a suitable delimiter
+    }
+    int estimatedSize = static_cast<int>(serializedvariants.size());
+    int bufferSize = estimatedSize;
+    // Send the serialized data over the channel
+    this->toOwner.send(bufferSize);
+    this->toOwner.send(serializedvariants.data(), serializedvariants.size());
+}
+void mpc::find_common() // Code written for one data owner
+{
+    // cout << "mpc in find common" << endl;
+    if(this->pid == 0) 
+    {
+        vector<string> genes, snps;
+        recv_string(snps);
+        // cout << "Snps size: " << snps.size() << endl;
+        //vector<string> snpset = intersect_vectors(this->snpset, snps);
+        send_string(snps);
+        recv_string(genes);
+        // cout << "Genes size: " << genes.size() << endl;
+        //vector<string> geneset = intersect_vectors(this->snpset, snps);
+        send_string(genes);
+    }
+}
 void mpc::calc_corr(Logger& cislogger, Logger& nominalLogger)
 {
     if (this->permutMat.empty())
@@ -1123,6 +1194,7 @@ void mpc::genperm(int row, string norm_method)
 }
 void mpc::receivePheno()
 {
+    // if (this->pid == 0) cout << "receiving pheno" << endl;
     vector<uint64_t> mat2;
     this->dataowner.recv(this->shape);
     this->dataowner.recv(mat2);
@@ -1151,6 +1223,7 @@ vector<vector<ZZ_p>> transpose(vector<vector<ZZ_p>>& matrix) {
 }
 void mpc::logRatio()
 {
+    // if (this->pid == 0) cout << "logRatio" << endl;
     // pseudo-reference is average log counts across all samples, for each gene
     uint64_t gene = this->pheno.size();
     uint64_t sample = this->pheno[0].size();
@@ -1185,17 +1258,7 @@ void mpc::logRatio()
         // cout <<totalsum;
         pseudoref.push_back(conv<uint64_t>(totalsum)/static_cast<double>(sample));
     }
-    // vector<ZZ_p> pseudosum = reveal(pseudoref,false);
-    // print_vector(pseudoref);
-    // for (int i=0; i<gene; i++)
-    // {
-    //     for(int j=0; j<sample; j++)
-    //     {
-    //         ratios[i][j] = conv<uint64_t>(this->pheno[i][j]) - pseudoref[i];
-    //         sendback.push_back(ratios[i][j]);
-    //     }
-    // }
-    // print_vector(sendback);
+
     this->toOwner.send(pseudoref);
 }
 void mpc::center_normalize_geno()
@@ -1242,7 +1305,11 @@ vector<vector<ZZ_p>> mpc::matmult(vector<vector<ZZ_p>>& mat1, vector<vector<ZZ_p
 {
     
     if (mat1[0].size() != mat2[0].size()) 
+    {
+        cout << mat1[0].size() << " / " << mat2[0].size() << endl;
         throw logic_error("mat1 column size and mat2 row size do not match.");
+    }
+        
     // vector<vector<ZZ_p>> result(mat1.size(), vector<ZZ_p>(mat2.size()));
     // vector<vector<ZZ_p>> transposed = transpose(mat2);
     auto minus_it = this->seedpair.find((this->pid + 2) % 3);
@@ -1340,4 +1407,57 @@ void mpc::close()
     this->toMinus.close();
     if (this->pid == 0)
         cout << "channels closed.\n";
+}
+
+void cp_mapping(int pid,  string ownerIP, int ownerPort, int toOwnerPort,  string address1, int recPort1, int sendPort1, string address2, int recPort2, int sendPort2,int rowstart, int rowend, int permut, Logger& cisLogger, Logger& nominalLogger) //, atomic<int>& readyCounter, mutex& mtx, condition_variable& cv)
+{    
+    mpc CP_i;
+    CP_i.initialize(pid, ownerIP, ownerPort, toOwnerPort, address1, recPort1, sendPort1, address2, recPort2, sendPort2);
+    CP_i.find_common();
+    auto invcdf_start = chrono::high_resolution_clock::now();
+    for (int row=rowstart; row<rowend; row++)
+    {
+        int returned = CP_i.validgene(); 
+        if (returned != 0){
+            continue;
+        }
+        CP_i.center_normalize_pheno();
+        CP_i.center_normalize_geno();
+        CP_i.permutPheno(permut);
+        CP_i.receiveGeno();
+        CP_i.calc_corr(cisLogger, nominalLogger);
+        CP_i.clearVectors();
+    }
+    auto invcdf_end = chrono::high_resolution_clock::now();
+    chrono::duration<double> duration = invcdf_end - invcdf_start;
+    double durationInSeconds = duration.count();
+    double durationInminutes = durationInSeconds/60.0;
+    CP_i.close();
+}
+
+void cp_preprocess(string norm_method, int pid,  string ownerIP, int ownerPort, int toOwnerPort,  string address1, int recPort1, int sendPort1, string address2, int recPort2, int sendPort2,int rowstart, int rowend)
+{    
+    mpc CP_i;
+    vector<vector<double>> resultVectors;
+    int status = CP_i.initialize(pid, ownerIP, ownerPort, toOwnerPort, address1, recPort1, sendPort1, address2, recPort2, sendPort2);
+    // cout << "norm_method: " << norm_method << endl;
+    if (norm_method == "deseq2")
+    {   
+        // if (this->pid ==0) cout <<"ss" << endl;
+        CP_i.receivePheno();
+        CP_i.logRatio();
+    }
+    auto invcdf_start = chrono::high_resolution_clock::now();
+    for (int row=rowstart; row<rowend; row++)
+    {
+        CP_i.ready();
+        CP_i.receiveSecrets();
+        CP_i.genperm(row, norm_method);
+        CP_i.clearVectors();
+    }
+    auto invcdf_end = chrono::high_resolution_clock::now();
+    chrono::duration<double> duration = invcdf_end - invcdf_start;
+    double durationInSeconds = duration.count();
+    double durationInminutes = durationInSeconds/60.0;
+    CP_i.close();
 }

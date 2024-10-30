@@ -1,5 +1,15 @@
 #include "utils.h"
 
+vector<ZZ_p> convert(vector<int> input)
+{
+    vector<ZZ_p> output;
+    for (int i=0; i<input.size(); i++)
+    {
+        output.push_back(conv<ZZ_p>(input[i]));
+    }
+    return output;
+}
+
 vector<vector<double>> eigenMatrixToVectorOfVectors(const MatrixXd& input) {
     vector<vector<double>> result(input.rows(), vector<double>(input.cols()));
     for (int i = 0; i < input.rows(); ++i) {
@@ -188,14 +198,15 @@ void read_bedfile_row(vector<double>& rowData, string& geneID, const string& fil
     // }
     data.close();
 }
-vector<vector<double>> getTPMFromMatrixFile(const string& filename, vector<string>& geneID) {
+vector<vector<double>> getTPMFromMatrixFile(const string& filename, vector<string>& geneID, bool header) {
     vector<vector<double>> rowsData;
     ifstream data(filename);
     string line;
     // int currentRow = 0;
 
     // Skip the first row (header)
-    getline(data, line);
+    if (header)
+        getline(data, line);
 
     while (getline(data, line)) {
         stringstream lineStream(line);
@@ -205,7 +216,7 @@ vector<vector<double>> getTPMFromMatrixFile(const string& filename, vector<strin
         // Skip the first two columns
         getline(lineStream, cell, '\t');
         geneID.push_back(cell);
-        getline(lineStream, cell, '\t');
+        // getline(lineStream, cell, '\t');
 
         vector<double> rowVector;
         while (getline(lineStream, cell, '\t')) {

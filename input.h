@@ -29,6 +29,7 @@ public:
     vector<string> snpChr;
     vector<string> snpIDs;
     vector<vector<double>> geno;
+    prepareInput(){};
     prepareInput(string& pheno_pos, string& geno_matrix, string& geno_pos, uint64_t window);
     string getCisRange(string geneID, vector<uint64_t>& positions);
     vector<uint64_t> getSNPrange(uint64_t start, uint64_t end, string chr, vector<string>& cisSnpIds);

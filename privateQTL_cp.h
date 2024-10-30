@@ -52,6 +52,7 @@ public:
 private:
     std::ofstream logFile;
 };
+
 class mpc
 {
 public:
@@ -91,6 +92,9 @@ public:
     void shuffle(vector<ZZ_p> &pi, vector<ZZ_p> &a);
     void unshuffle(vector<ZZ_p> &pi, vector<ZZ_p> &b);
     void reveal_matrix(vector<vector<ZZ_p>>& geno, vector<vector<ZZ_p>>& pheno,string name);
+    void recv_string(vector<string>& stringvec);
+    void send_string(vector<string>& tosend);
+    void find_common();
     void calc_corr(Logger& cislogger, Logger& nominalLogger);
     void shuffleM(vector<ZZ_p> &pi, vector<vector<ZZ_p>> &a);
     void apply_shared_perm(vector<ZZ_p> &rho, vector<ZZ_p> &k);
@@ -148,7 +152,6 @@ public:
         }
     }
 
-
     inline void EigentoZZ(vector<uint64_t>& share1, vector<uint64_t>& share2, vector<vector<ZZ_p>>& dest){
         // vector<uint32_t> converted(v.size());
         if (share1.size() != share2.size())
@@ -176,8 +179,6 @@ private:
     vector<vector<ZZ_p>> geno;
     vector<vector<ZZ_p>> pheno;
     vector<uint64_t> shape;
-    // atomic<int>& readyCounter;
-    // atomic<bool> allPartiesReady;
     Channel dataowner;
     Channel toOwner;
     Channel fromPlus;
@@ -185,6 +186,8 @@ private:
     Channel toPlus;
     Channel toMinus;  
 };
+void cp_mapping(int pid,  string ownerIP, int ownerPort, int toOwnerPort,  string address1, int recPort1, int sendPort1, string address2, int recPort2, int sendPort2,int rowstart, int rowend, int permut, Logger& cisLogger, Logger& nominalLogger); //, atomic<int>& readyCounter, mutex& mtx, condition_variable& cv)
+void cp_preprocess(string norm_method, int pid,  string ownerIP, int ownerPort, int toOwnerPort,  string address1, int recPort1, int sendPort1, string address2, int recPort2, int sendPort2,int rowstart, int rowend);
 inline vector<ZZ_p> convVec(vector<uint64_t> v){
     vector<ZZ_p> converted(v.size());
     for (int i=0; i<v.size(); i++)

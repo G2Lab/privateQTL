@@ -54,7 +54,7 @@ vector<string> TSVtoVector(const string &filename);
 vector<double> TSVtoDoubleVector(const string &filename);
 vector<double> getRowFromMatrixFile(string& filename, int rowIndex);
 void read_bedfile_row(vector<double>& rowData, string& geneID, const string& filename, int row, int skipcols, bool header);
-vector<vector<double>> getTPMFromMatrixFile(const string& filename, vector<string>& geneID);
+vector<vector<double>> getTPMFromMatrixFile(const string& filename, vector<string>& geneID, bool header);
 vector<vector<double>> getCovariates(const string& filename);
 vector<vector<uint64_t>> getCountFromMatrixFile(const string& filename, vector<string>& geneID, int skipcols);
 vector<uint64_t> ScaleVector(vector<double> &v, int k);
