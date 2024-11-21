@@ -8,6 +8,7 @@
 #include <sys/resource.h>
 void dataclient::initialize(int sendport1, int recvport1, string address1, int sendport2, int recvport2, string address2, int sendport3, int recvport3, string address3) 
 {
+    trace("dataclient::initialize");
     // IOService ios;
     Endpoint epsend1(ios, address1, sendport1, EpMode::Server);
     Endpoint epsend2(ios, address2, sendport2, EpMode::Server);
@@ -34,6 +35,7 @@ void dataclient::initialize(int sendport1, int recvport1, string address1, int s
 
 prepareInput dataclient::load_genotype(string pheno_pos, string geno_path, string geno_pos, int cis_window)
 {
+    trace("dataclient::load_genotype");
     cout << "Loading Genotype matrix..." << flush;
     auto loadgeno = chrono::high_resolution_clock::now();
     prepareInput testinput(pheno_pos, geno_path ,geno_pos,cis_window);
@@ -46,6 +48,7 @@ prepareInput dataclient::load_genotype(string pheno_pos, string geno_path, strin
 }
 void dataclient::do_recv_string(vector<string>& stringvec)
 {
+    trace("dataclient::do_recv_string");
     // this->dataowner.recv(snps);
     int buffersize;
     this->p1_owner.recv(buffersize);
@@ -61,6 +64,7 @@ void dataclient::do_recv_string(vector<string>& stringvec)
 }
 void dataclient::do_send_string(vector<string>& tosend)
 {
+    trace("dataclient::do_send_string");
     string serializedvariants="";
     for (const std::string& str : tosend) {
         serializedvariants += str + ";"; // Use a suitable delimiter
@@ -73,6 +77,7 @@ void dataclient::do_send_string(vector<string>& tosend)
 }
 void dataclient::find_common(string phenofile)
 {
+    trace("dataclient::find_common");
     vector<vector<double>> common_pheno, common_geno;
     vector<string> snpset, geneset;
     do_send_string(this->myinput.snpIDs);
@@ -107,6 +112,7 @@ void dataclient::find_common(string phenofile)
 }
 void dataclient::mapping(string pheno_path, string geno_path, string pheno_pos, string geno_pos, int rowstart, int rowend, int permut)
 {
+    trace("dataclient::mapping");
     // dataclient client1;
     // initialize(sendport1, recvport1, address1, sendport2, recvport2, address2, sendport3, recvport3, address3);
     auto pre_start = chrono::high_resolution_clock::now();
@@ -318,6 +324,7 @@ void dataclient::mapping(string pheno_path, string geno_path, string pheno_pos, 
 
 void bitdecompose(vector<uint64_t> &secrets, vector<BitVector> &bitInput)
 {
+    trace("bitdecompose");
     // vector<BitVector> bitInput;
     for (int i = 0; i < secrets.size(); i++)
     {
@@ -328,6 +335,7 @@ void bitdecompose(vector<uint64_t> &secrets, vector<BitVector> &bitInput)
 }
 
 vector<double> get_quantiles(vector<vector<double>>& phen_matrix, vector<vector<size_t>>& rank_matrix) {
+    trace("get_quantiles");
     for (size_t i = 0; i < phen_matrix[0].size(); i++) {
         vector<pair<double, size_t>> sorted_indices;
         for (size_t j = 0; j < phen_matrix.size(); j++) {
@@ -353,6 +361,7 @@ vector<double> get_quantiles(vector<vector<double>>& phen_matrix, vector<vector<
 }
 
 void sample_QN(vector<vector<double>>& phen_matrix, vector<vector<size_t>>& rank_matrix, vector<double>& total_quantiles) {
+    trace("sample_QN");
     size_t m = phen_matrix.size();
     size_t n = phen_matrix[0].size();
 
@@ -364,6 +373,7 @@ void sample_QN(vector<vector<double>>& phen_matrix, vector<vector<size_t>>& rank
 }
 
 vector<vector<double>> deseq2_cpm(vector<vector<uint64_t>>& counts_df) {
+    trace("deseq2_cpm");
     int numGenes = counts_df.size();
     int numSamples = counts_df[0].size();
 
@@ -384,6 +394,7 @@ vector<vector<double>> deseq2_cpm(vector<vector<uint64_t>>& counts_df) {
 
 void dataclient::phenopreprocess(string norm_method, string pheno_input, int rowstart, int rowend, string zscorefile, vector<vector<double>>& resultVec, vector<string>& gene_string)
 {
+    trace("dataclient::phenopreprocess");
     // initialize(sendport1, recvport1, address1, sendport2, recvport2, address2, sendport3, recvport3, address3);
     auto pre_start = chrono::high_resolution_clock::now();
     vector<string> geneID;
@@ -690,6 +701,7 @@ void dataclient::phenopreprocess(string norm_method, string pheno_input, int row
 }
 void dataclient::close()
 {
+    trace("dataclient::close");
     std::cout <<"Dataclient closing" << std::endl;
     this->owner_p1.close();
     this->owner_p2.close();
@@ -701,6 +713,7 @@ void dataclient::close()
 }
 void dataclient_mapping(string pheno_path, string geno_path, string pheno_pos, string geno_pos, int sendport1, int recvport1, string address1, int sendport2, int recvport2, string address2, int sendport3, int recvport3, string address3,int rowstart, int rowend, int permut)
 {
+    trace("dataclient_mapping");
     dataclient client1;
     client1.initialize(sendport1, recvport1, address1, sendport2, recvport2, address2, sendport3, recvport3, address3);
     // client1.find_common(pheno_path);
@@ -709,6 +722,7 @@ void dataclient_mapping(string pheno_path, string geno_path, string pheno_pos, s
 }
 void dataclient_preprocessing(string norm_method, string pheno_input, int sendport1, int recvport1, string address1, int sendport2, int recvport2, string address2, int sendport3, int recvport3, string address3,int rowstart, int rowend,string zscorefile, vector<vector<double>>& resultVec, vector<string>& gene_string)
 {
+    trace("dataclient_preprocessing");
     cout << "owner calling privateQTLII script" << endl;
     dataclient client2;
     client2.initialize(sendport1, recvport1, address1, sendport2, recvport2, address2, sendport3, recvport3, address3);

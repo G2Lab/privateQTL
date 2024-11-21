@@ -47,6 +47,7 @@ typedef Eigen::Matrix <double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> 
 //     }
 //     return result;
 // }
+void trace(const string& message);
 vector<vector<double>> eigenMatrixToVectorOfVectors(const MatrixXd& input); 
 MatrixXd vectorOfVectorsToEigenMatrix(const vector<vector<double>>& input);
 vector<double> CSVtoVector(const string &filename);

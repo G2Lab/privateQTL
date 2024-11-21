@@ -9,6 +9,7 @@
 #include <fstream>
 #include <cmath>
 #include <sstream>
+#include "utils.h"
 using namespace std;
 
 struct GeneData {

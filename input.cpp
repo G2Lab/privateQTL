@@ -1,8 +1,10 @@
 #include "input.h"
 #include <typeinfo>
+#include <chrono>
 
 // Data owners convert plink bed file to dataframe using gtex pipeline
 void getGenotype(const string& filename, vector<vector<double>>& geno, vector<string>& snpID) {
+    trace("getGenotype");
     // cout << "Fetching genotype into memory..\n";
     vector<vector<double>> rowsData;
     ifstream data(filename);
@@ -41,6 +43,7 @@ void getGenotype(const string& filename, vector<vector<double>>& geno, vector<st
  
 // gene positions
 unordered_map<string, GeneData> readDataFile(string& filename) {
+    trace("readDataFile");
     unordered_map<string, GeneData> geneMap;
     ifstream data(filename);
     string line;
@@ -69,6 +72,7 @@ unordered_map<string, GeneData> readDataFile(string& filename) {
 
 void getSNPpos(string& geno_pos, vector<uint64_t>& positions, vector<string>& chrpos)
 {
+    trace("getSNPpos");
     ifstream data(geno_pos);
     string line;
     // Skip the header row
@@ -85,14 +89,19 @@ void getSNPpos(string& geno_pos, vector<uint64_t>& positions, vector<string>& ch
 }
 prepareInput::prepareInput(string& pheno_pos, string& geno_matrix, string& geno_pos, uint64_t window)
 {
+    trace("prepareInput");
     ciswindow = window;
+    cout << "loading data..." << endl;
     genePos = readDataFile(pheno_pos);
+    cout << "gene positions loaded" << endl;
     getSNPpos(geno_pos, snpPos, snpChr);
+    cout << "snp positions loaded" << endl;
     getGenotype(geno_matrix, geno, snpIDs);
     cout << string("genotype matrix loaded: "+to_string(geno.size())+","+to_string(geno[0].size())+"\n");
 }
 string prepareInput::getCisRange(string geneID, vector<uint64_t>& positions)
 { 
+    trace("getCisRange");
     cout << "getting cis range:";
     // get cis range based on gene position
     const GeneData& geneData = genePos[geneID];
@@ -104,6 +113,7 @@ string prepareInput::getCisRange(string geneID, vector<uint64_t>& positions)
 }
 vector<uint64_t> prepareInput::getSNPrange(uint64_t start, uint64_t end, string chrnum, vector<string>& cisSnpIds)
 {     
+    trace("prepareInput::getSNPrange");
     // get snp indices that fall within range
     vector<uint64_t> indices;
     auto lb_it = lower_bound(snpPos.begin(), snpPos.end(), static_cast<int64_t>(start) - static_cast<int64_t>(ciswindow));
@@ -128,6 +138,7 @@ vector<uint64_t> prepareInput::getSNPrange(uint64_t start, uint64_t end, string 
 }
 int prepareInput::sliceGeno(vector<uint64_t> positions, string& chr, int64_t missing, vector<string>& cisSNPs, vector<vector<double>>& slicedmatrix)
 {
+    trace("prepareInput::sliceGeno");
     cout << "in slicegeno...";
     uint64_t start = positions[0];
     uint64_t end = positions[1];

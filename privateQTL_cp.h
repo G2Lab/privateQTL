@@ -170,8 +170,10 @@ public:
     void writeEigenToTSV(Eigen::Matrix <double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>& mat, const string& name);
 private:
     block commonSeed = oc::toBlock(27);
-    map<int, PRNG *> seedpair;
-    PRNG* localprng;
+    // map<int, PRNG *> seedpair;
+    map<int, std::unique_ptr<PRNG>> seedpair;
+    // PRNG* localprng;
+    std::unique_ptr<PRNG> localprng;
     vector<ZZ_p> shares;
     vector<vector<ZZ_p>> permutMat;
     vector<ZZ_p> identity;

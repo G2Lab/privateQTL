@@ -4,6 +4,7 @@ const static Eigen::IOFormat TSVFormat(Eigen::StreamPrecision, Eigen::DontAlignC
  
 void mpc::writeEigenToTSV(Eigen::Matrix <double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>& mat, const string& name)
 {
+    trace("mpc::writeEigenToTSV");
     string filename = "/gpfs/commons/groups/gursoy_lab/aychoi/eqtl/mpc/securesort/output/" + name + ".tsv";
     ofstream file(filename);
     if (file.is_open()) {
@@ -16,6 +17,7 @@ void mpc::writeEigenToTSV(Eigen::Matrix <double, Eigen::Dynamic, Eigen::Dynamic,
 }
 double cal_accuracy(vector<double>& predicted, string& filename, int N)
 {
+    trace("cal_accuracy");
     vector<double> actual = getRowFromMatrixFile(filename,N);
     // vector<double> actual = CSVtoVector(filename);
     // cout << string("row: "+to_string(N)+", numCol: "+to_string(numCol)+"\n");
@@ -42,6 +44,7 @@ double cal_accuracy(vector<double>& predicted, string& filename, int N)
 }
 bool mpc::initialize(int pid, string ownerIP, int ownerPort, int toOwnerPort, string address1, int recPort1, int sendPort1, string address2, int recPort2, int sendPort2)
 {
+    trace("mpc::initialize");
     this->pid = pid;
     globalprng.SetSeed(commonSeed);
     if (!setupChannels(ownerIP, ownerPort, toOwnerPort, address1, recPort1, sendPort1, address2, recPort2, sendPort2))
@@ -63,6 +66,7 @@ bool mpc::initialize(int pid, string ownerIP, int ownerPort, int toOwnerPort, st
 }
 bool mpc::setupChannels(string ownerIP, int ownerPort, int toOwnerPort, string address1, int recPort1, int sendPort1, string address2, int recPort2, int sendPort2)
 {
+    trace("mpc::setupChannels");
     Endpoint p_owner(ios, ownerIP, ownerPort, EpMode::Client);
     Endpoint ownersend(ios, ownerIP, toOwnerPort, EpMode::Server);
     Endpoint eprec1(ios, address1, recPort1, EpMode::Client);
@@ -77,17 +81,18 @@ bool mpc::setupChannels(string ownerIP, int ownerPort, int toOwnerPort, string a
     this->toPlus = epsend1.addChannel();
     this->toMinus = epsend2.addChannel();
     // cout << "Established channels with the computing parties and data owner.\n";
-    p_owner.stop();
-    ownersend.stop();
-    eprec1.stop();
-    eprec2.stop();
-    epsend1.stop();
-    epsend2.stop();
+    // p_owner.stop();
+    // ownersend.stop();
+    // eprec1.stop();
+    // eprec2.stop();
+    // epsend1.stop();
+    // epsend2.stop();
     // ios.stop();
     return true;
 }
 bool mpc::setupSeeds()
 {
+    trace("mpc::setupSeeds");
     // cout << "setting up shared seeds within parties..\n";
     // lower number pid party sends prng seed to higher number pid party
     //  Check if they already share a prng
@@ -105,20 +110,21 @@ bool mpc::setupSeeds()
     }
     try
     {
-        this->localprng = new PRNG(oc::toBlock(this->pid)); //NEEDS CHANGE
-
+        // this->localprng = new PRNG(oc::toBlock(this->pid)); //NEEDS CHANGE
+        this->localprng = std::make_unique<PRNG>(oc::toBlock(this->pid));
         uint64_t plusSeed = this->localprng->get<uint64_t>();
         this->toPlus.send(plusSeed);
 
         uint64_t minusSeed;
         this->fromMinus.recv(minusSeed);
 
-        PRNG *wPlus = new PRNG(oc::toBlock(plusSeed));
-        PRNG *wMinus = new PRNG(oc::toBlock(minusSeed));
-
+        // PRNG *wPlus = new PRNG(oc::toBlock(plusSeed));
+        // PRNG *wMinus = new PRNG(oc::toBlock(minusSeed));
+        this->seedpair.insert({(this->pid + 1) % 3, std::make_unique<PRNG>(oc::toBlock(plusSeed))});
+        this->seedpair.insert({(this->pid + 2) % 3, std::make_unique<PRNG>(oc::toBlock(minusSeed))});
         /// add prng to each party map
-        this->seedpair.insert({(this->pid + 1) % 3, wPlus});
-        this->seedpair.insert({(this->pid + 2) % 3, wMinus});
+        // this->seedpair.insert({(this->pid + 1) % 3, wPlus});
+        // this->seedpair.insert({(this->pid + 2) % 3, wMinus});
     }
     catch (const std::exception &e)
     {
@@ -131,6 +137,7 @@ bool mpc::setupSeeds()
 
 void mpc::ready()
 {
+    trace("mpc::ready");
     bool empty = areVectorsEmpty();
     // if (empty)
         // cout << string(to_string(this->pid) + " ready to receive.\n");
@@ -139,6 +146,7 @@ void mpc::ready()
 }
 void mpc::receiveSecrets()
 {
+    trace("mpc::receiveSecrets");
     vector<uint64_t> dest;
     this->dataowner.recv(dest);
     this->n = dest[0]; //number of secrets
@@ -191,6 +199,7 @@ void mpc::receiveSecrets()
 // template class std::vector<ZZ_p>;
 
 void mpc::assertSize(vector<ZZ_p> pi, string tag) {
+    // trace("mpc::assertSize");
     for (ZZ_p z : pi) {
         uint64_t value = conv<uint64_t>(z);
         if (value > pi.size() || value < 1) {
@@ -202,6 +211,7 @@ void mpc::assertSize(vector<ZZ_p> pi, string tag) {
 }
 vector<uint64_t> mpc::apply_plaintext_perm(vector<uint64_t> rho, vector<uint64_t> sigma)
 {
+    trace("mpc::apply_plaintext_perm");
     //Applying rho on sigma rho o sigma
     if (rho.size() != sigma.size())
         throw invalid_argument("This is regular apply permutation; both pis should be same size.");
@@ -215,6 +225,7 @@ vector<uint64_t> mpc::apply_plaintext_perm(vector<uint64_t> rho, vector<uint64_t
 
 vector<ZZ_p> mpc::Frand(uint64_t bufferSize) 
 {
+    // trace("mpc::Frand");
     if (bufferSize <= 1)
     {
         throw std::invalid_argument("bufferSize must be positive");
@@ -331,6 +342,7 @@ vector<ZZ_p> mpc::reveal(vector<ZZ_p>& pi, bool isperm)
 
 void mpc::reshare(vector<ZZ_p>& shares, int reshareID)
 {
+    // trace("mpc::reshare");
     vector<ZZ_p> randoms(3);
     vector<uint64_t> sendvec;
     if (reshareID == (this->pid + 1) % 3) // share to plus
@@ -388,6 +400,7 @@ void mpc::reshare(vector<ZZ_p>& shares, int reshareID)
 }
 void mpc::reshareM(vector<vector<ZZ_p>>& shares, int reshareID)
 {
+    trace("mpc::reshareM");
     vector<ZZ_p> randoms(3);
     vector<vector<uint64_t>> sendvec(shares.size(), vector<uint64_t>(shares[0].size()));
     if (reshareID == (this->pid + 1) % 3) // share to plus
@@ -452,6 +465,7 @@ void mpc::reshareM(vector<vector<ZZ_p>>& shares, int reshareID)
 //is adding alpha beta gamma necessary? 
 vector<ZZ_p> mpc::Fmult(vector<ZZ_p> k_i, vector<ZZ_p> s_i)
 {
+    trace("mpc::Fmult");
     auto minus_it = this->seedpair.find((this->pid + 2) % 3);
     auto plus_it = this->seedpair.find((this->pid + 1) % 3);
     PRNG &minus_PRNG = *(minus_it->second);
@@ -470,6 +484,7 @@ vector<ZZ_p> mpc::Fmult(vector<ZZ_p> k_i, vector<ZZ_p> s_i)
 
 vector<ZZ_p> mpc::genbitperm(vector<ZZ_p> &keybit)
 {
+    trace("mpc::genbitperm");
     vector<ZZ_p> f0(keybit.size()), f1(keybit.size()), s0(keybit.size()), s1(keybit.size());
     vector<ZZ_p> s(2, to_ZZ_p(0));
     vector<ZZ_p> p;
@@ -510,6 +525,7 @@ vector<ZZ_p> mpc::genbitperm(vector<ZZ_p> &keybit)
 
 vector<ZZ_p> mpc::inversePerm(vector<ZZ_p> pi)
 {
+    trace("mpc::inversePerm");
     assertSize(pi, "inversePerm");
     vector<uint64_t> arr2(pi.size());
     vector<ZZ_p> inverse(pi.size());
@@ -567,6 +583,7 @@ void mpc::apply_perm_local(bool participate, vector<ZZ_p> &v, vector<ZZ_p> &pi)
 }
 void mpc::apply_perm_localM(bool participate, vector<vector<ZZ_p>> &v, vector<ZZ_p> &pi)
 {
+    trace("mpc::apply_perm_localM");
     if (participate)
     {
         for (ZZ_p z : pi) 
@@ -594,6 +611,7 @@ void mpc::apply_perm_localM(bool participate, vector<vector<ZZ_p>> &v, vector<ZZ
     }
 }
 void mpc::center_normalize_pheno() {
+    trace("mpc::center_normalize_pheno");
     double pheno_sum=0.0;
     double sq_error_sum = 0.0;
     if(this->pid == 0){
@@ -609,7 +627,7 @@ void mpc::center_normalize_pheno() {
 }
 void mpc::permutPheno(int permut)
 {
-
+    trace("mpc::permutPheno");
     vector<uint64_t> normalized_pheno;
     this->dataowner.recv(normalized_pheno);
     vector<ZZ_p> pheno = convVec(normalized_pheno);
@@ -630,6 +648,7 @@ void mpc::permutPheno(int permut)
 }
 void mpc::shuffle(vector<ZZ_p> &pi, vector<ZZ_p> &a)
 {
+    // trace("mpc::shuffle");
     assertSize(pi, "Shuffle");
     if (pi.size() != a.size())
         throw std::invalid_argument("Your shares and pi size are different");
@@ -669,6 +688,7 @@ void mpc::shuffle(vector<ZZ_p> &pi, vector<ZZ_p> &a)
 }
 void mpc::unshuffle(vector<ZZ_p> &pi, vector<ZZ_p> &b)
 {
+    trace("mpc::unshuffle");
     assertSize(pi, "unshuffle");
     vector<ZZ_p> pi_m, pi_p;
     for (size_t i=0; i<pi.size()/2; i++)
@@ -710,6 +730,7 @@ void mpc::unshuffle(vector<ZZ_p> &pi, vector<ZZ_p> &b)
 
 void mpc::shuffleM(vector<ZZ_p> &pi, vector<vector<ZZ_p>> &a)
 {
+    // trace("mpc::shuffleM");
     assertSize(pi, "Shuffle");
     // if (pi.size() != a.size())
     //     throw std::invalid_argument("Your shares and pi size are different");
@@ -749,6 +770,7 @@ void mpc::shuffleM(vector<ZZ_p> &pi, vector<vector<ZZ_p>> &a)
 }
 void mpc::reveal_matrix(vector<vector<ZZ_p>>& geno, vector<vector<ZZ_p>>& pheno,string name)
 {
+    trace("mpc::reveal_matrix");
     // vector<vector<double>> sliced_geno;
     Eigen::Matrix <double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> sliced_geno;
     sliced_geno.resize(geno.size(), geno[0].size()/2);
@@ -813,6 +835,7 @@ void mpc::reveal_matrix(vector<vector<ZZ_p>>& geno, vector<vector<ZZ_p>>& pheno,
 vector<string> intersect_vectors(const vector<string>& one,
                                                  const vector<string>& two,
                                                  const vector<string>& three) {
+    trace("intersect_vectors");
     // Sort the vectors to prepare for set intersection
     vector<string> sorted_one = one;
     vector<string> sorted_two = two;
@@ -834,6 +857,7 @@ vector<string> intersect_vectors(const vector<string>& one,
 }
 void mpc::recv_string(vector<string>& stringvec)
 {
+    trace("mpc::recv_string");
     // this->dataowner.recv(snps);
     int buffersize;
     this->dataowner.recv(buffersize);
@@ -851,6 +875,7 @@ void mpc::recv_string(vector<string>& stringvec)
 }
 void mpc::send_string(vector<string>& tosend)
 {
+    trace("mpc::send_string");
     string serializedvariants="";
     for (const std::string& str : tosend) {
         serializedvariants += str + ";"; // Use a suitable delimiter
@@ -863,6 +888,7 @@ void mpc::send_string(vector<string>& tosend)
 }
 void mpc::find_common() // Code written for one data owner
 {
+    trace("mpc::find_common");
     // cout << "mpc in find common" << endl;
     if(this->pid == 0) 
     {
@@ -879,6 +905,7 @@ void mpc::find_common() // Code written for one data owner
 }
 void mpc::calc_corr(Logger& cislogger, Logger& nominalLogger)
 {
+    trace("mpc::calc_corr");
     if (this->permutMat.empty())
     {
         throw invalid_argument("permutation matrix has not been made.");
@@ -1056,6 +1083,7 @@ void mpc::calc_corr(Logger& cislogger, Logger& nominalLogger)
 }
 void mpc::apply_shared_perm(vector<ZZ_p> &rho, vector<ZZ_p> &k)
 {
+    trace("mpc::apply_shared_perm");
     if (rho.size() != k.size()){
         cout << string("rho: "+ to_string(rho.size()) + ", k: "+ to_string(k.size()));
         throw std::invalid_argument("rho and k size don't match");
@@ -1091,6 +1119,7 @@ void mpc::apply_shared_perm(vector<ZZ_p> &rho, vector<ZZ_p> &k)
 
 void mpc::compose(vector<ZZ_p> &sigma, vector<ZZ_p> &rho)
 {
+    trace("mpc::compose");
     vector<ZZ_p> pi=Frand(sigma.size()/2);
     shuffle(pi,sigma);
     vector<ZZ_p> reconstructed = reveal(sigma, false);
@@ -1118,6 +1147,7 @@ void mpc::compose(vector<ZZ_p> &sigma, vector<ZZ_p> &rho)
 template <typename T>
 void writeVectorToCSV(const std::vector<T>& data, int pid, int row, string name)
 {
+    trace("writeVectorToCSV");
     std::string filename = "/gpfs/commons/groups/gursoy_lab/aychoi/eqtl/mpc/securesort/output/" + name + "_pid" + std::to_string(pid) + "_row" + to_string(row)+ ".csv";
     std::ofstream file(filename);
     if (file.is_open())
@@ -1137,6 +1167,7 @@ void writeVectorToCSV(const std::vector<T>& data, int pid, int row, string name)
 
 void mpc::genperm(int row, string norm_method)
 {
+    trace("mpc::genperm");
     if (this->pid ==0)
         cout << "Secure sort execution... ";
     auto sort_start = chrono::high_resolution_clock::now();
@@ -1194,6 +1225,7 @@ void mpc::genperm(int row, string norm_method)
 }
 void mpc::receivePheno()
 {
+    trace("mpc::receivePheno");
     // if (this->pid == 0) cout << "receiving pheno" << endl;
     vector<uint64_t> mat2;
     this->dataowner.recv(this->shape);
@@ -1223,6 +1255,7 @@ vector<vector<ZZ_p>> transpose(vector<vector<ZZ_p>>& matrix) {
 }
 void mpc::logRatio()
 {
+    trace("mpc::logRatio");
     // if (this->pid == 0) cout << "logRatio" << endl;
     // pseudo-reference is average log counts across all samples, for each gene
     uint64_t gene = this->pheno.size();
@@ -1263,6 +1296,7 @@ void mpc::logRatio()
 }
 void mpc::center_normalize_geno()
 {
+    trace("mpc::center_normalize_geno");
     if(this->pid ==0)
     {
         vector<double> data_sum;
@@ -1286,6 +1320,7 @@ void mpc::center_normalize_geno()
 }
 void mpc::receiveGeno()
 {
+    trace("mpc::receiveGeno");
     vector<uint64_t> mat1, genoshape;
     this->dataowner.recv(genoshape);
     // this->shape.push_back(genoshape);
@@ -1303,7 +1338,7 @@ void mpc::receiveGeno()
 }
 vector<vector<ZZ_p>> mpc::matmult(vector<vector<ZZ_p>>& mat1, vector<vector<ZZ_p>>& mat2)
 {
-    
+    trace("mpc::matmult");
     if (mat1[0].size() != mat2[0].size()) 
     {
         cout << mat1[0].size() << " / " << mat2[0].size() << endl;
@@ -1363,6 +1398,7 @@ vector<vector<ZZ_p>> mpc::matmult(vector<vector<ZZ_p>>& mat1, vector<vector<ZZ_p
     //////////
     const size_t chunkSize = 200000;
     vector<uint64_t> received_data;
+    auto send_start = std::chrono::high_resolution_clock::now();
     for (size_t i = 0; i < to_send.size(); i += chunkSize) {
         size_t remaining = min(chunkSize, to_send.size() - i);
         vector<uint64_t> chunk_send(to_send.begin() + i, to_send.begin() + i + remaining);
@@ -1374,6 +1410,10 @@ vector<vector<ZZ_p>> mpc::matmult(vector<vector<ZZ_p>>& mat1, vector<vector<ZZ_p
         if(this->pid == 0)
             cout << "\tSent and received " << remaining << " elements in this chunk." << endl;
     }
+    auto send_end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> send_elapsed = send_end - send_start;
+    double send_seconds = send_elapsed.count();
+    std::cout << ">>>>>>>Total time: " << send_seconds << " seconds to send " << to_string(to_send.size()) << " uint64_t elements and to receive (uint64_t) " << to_string(received_data.size()) << std::endl;
 
     if (this->pid ==0)
         cout << "Send and receive done:" << flush;
@@ -1393,12 +1433,14 @@ vector<vector<ZZ_p>> mpc::matmult(vector<vector<ZZ_p>>& mat1, vector<vector<ZZ_p
 }
 int mpc::validgene()
 {
+    trace("mpc::validgene");
     int returned;
     this->dataowner.recv(returned);
     return returned;
 }
 void mpc::close()
 {
+    trace("mpc::close");
     // std::lock_guard<std::mutex> lock(mtx);
     this->dataowner.close();
     this->fromPlus.close();
@@ -1411,6 +1453,7 @@ void mpc::close()
 
 void cp_mapping(int pid,  string ownerIP, int ownerPort, int toOwnerPort,  string address1, int recPort1, int sendPort1, string address2, int recPort2, int sendPort2,int rowstart, int rowend, int permut, Logger& cisLogger, Logger& nominalLogger) //, atomic<int>& readyCounter, mutex& mtx, condition_variable& cv)
 {    
+    trace("cp_mapping");
     mpc CP_i;
     CP_i.initialize(pid, ownerIP, ownerPort, toOwnerPort, address1, recPort1, sendPort1, address2, recPort2, sendPort2);
     CP_i.find_common();
@@ -1437,6 +1480,7 @@ void cp_mapping(int pid,  string ownerIP, int ownerPort, int toOwnerPort,  strin
 
 void cp_preprocess(string norm_method, int pid,  string ownerIP, int ownerPort, int toOwnerPort,  string address1, int recPort1, int sendPort1, string address2, int recPort2, int sendPort2,int rowstart, int rowend)
 {    
+    trace("cp_preprocess");
     mpc CP_i;
     vector<vector<double>> resultVectors;
     int status = CP_i.initialize(pid, ownerIP, ownerPort, toOwnerPort, address1, recPort1, sendPort1, address2, recPort2, sendPort2);

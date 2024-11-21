@@ -1,5 +1,12 @@
 #include "utils.h"
 
+bool isTrace = true;
+void trace(const string& message) {
+    if (isTrace) {
+        cout << message << endl;
+    }
+}
+
 vector<ZZ_p> convert(vector<int> input)
 {
     vector<ZZ_p> output;
@@ -588,6 +595,7 @@ int learnDF(vector < double > & corr, double & df) {
 	gsl_vector_free(x);
 	gsl_vector_free(ss);
 	gsl_multimin_fminimizer_free (s);
+    delete par;
 	return (status == GSL_SUCCESS);
 }
 double getTstat2(double corr, double df) {
