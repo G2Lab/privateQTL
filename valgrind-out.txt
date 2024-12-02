@@ -1,0 +1,128 @@
+==00:00:00:00.000 21723== Memcheck, a memory error detector
+==00:00:00:00.001 21723== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==00:00:00:00.001 21723== Using Valgrind-3.17.0-07f0cdcbb4-20210319X and LibVEX; rerun with -h for copyright info
+==00:00:00:00.002 21723== Command: ./eqtl_mapping 1 0 1 2 1000 /gpfs/commons/groups/gursoy_lab/aychoi/eqtl/mpc/privateQTL/privateQTL/example/toy_GEUVADIS_deseq2_pheno.tsv /gpfs/commons/groups/gursoy_lab/aychoi/eqtl/mpc/privateQTL/privateQTL/example/toy_GEUVADIS_preprocessed_geno.tsv /gpfs/commons/groups/gursoy_lab/aychoi/eqtl/mpc/privateQTL/privateQTL/example/toy_pheno_position.tsv /gpfs/commons/groups/gursoy_lab/aychoi/eqtl/mpc/privateQTL/privateQTL/example/toy_geno_position.tsv /gpfs/commons/groups/gursoy_lab/aychoi/eqtl/mpc/securesort/project/test /gpfs/commons/groups/gursoy_lab/aychoi/eqtl/mpc/securesort/project/testn
+==00:00:00:00.002 21723== Parent PID: 21707
+==00:00:00:00.002 21723== 
+--00:00:00:00.002 21723-- 
+--00:00:00:00.002 21723-- Valgrind options:
+--00:00:00:00.002 21723--    --leak-check=full
+--00:00:00:00.002 21723--    --show-leak-kinds=all
+--00:00:00:00.002 21723--    --track-origins=yes
+--00:00:00:00.002 21723--    --verbose
+--00:00:00:00.002 21723--    --time-stamp=yes
+--00:00:00:00.002 21723--    --log-file=/gpfs/commons/groups/gursoy_lab/aychoi/eqtl/mpc/privateQTL/privateQTL/example/valgrind-out.txt
+--00:00:00:00.002 21723-- Contents of /proc/version:
+--00:00:00:00.002 21723--   Linux version 3.10.0-1160.66.1.el7.x86_64 (mockbuild@kbuilder.bsys.centos.org) (gcc version 4.8.5 20150623 (Red Hat 4.8.5-44) (GCC) ) #1 SMP Wed May 18 16:02:34 UTC 2022
+--00:00:00:00.002 21723-- 
+--00:00:00:00.002 21723-- Arch and hwcaps: AMD64, LittleEndian, amd64-cx16-lzcnt-rdtscp-sse3-ssse3-avx-avx2-bmi-f16c-rdrand
+--00:00:00:00.002 21723-- Page sizes: currently 4096, max supported 4096
+--00:00:00:00.002 21723-- Valgrind library directory: /nfs/sw/valgrind/valgrind-3.17.0/libexec/valgrind
+--00:00:00:00.034 21723-- Reading syms from /gpfs/commons/groups/gursoy_lab/aychoi/eqtl/mpc/privateQTL/privateQTL/build/eqtl_mapping
+--00:00:00:00.211 21723-- Reading syms from /usr/lib64/ld-2.17.so
+--00:00:00:00.214 21723-- Reading syms from /nfs/sw/valgrind/valgrind-3.17.0/libexec/valgrind/memcheck-amd64-linux
+--00:00:00:00.217 21723--    object doesn't have a dynamic symbol table
+--00:00:00:00.341 21723-- Scheduler: using generic scheduler lock implementation.
+--00:00:00:00.349 21723-- Reading suppressions file: /nfs/sw/valgrind/valgrind-3.17.0/libexec/valgrind/default.supp
+==00:00:00:00.354 21723== embedded gdbserver: reading from /scratch/vgdb-pipe-from-vgdb-to-21723-by-aychoi-on-pe2cc3-054
+==00:00:00:00.354 21723== embedded gdbserver: writing to   /scratch/vgdb-pipe-to-vgdb-from-21723-by-aychoi-on-pe2cc3-054
+==00:00:00:00.354 21723== embedded gdbserver: shared mem   /scratch/vgdb-pipe-shared-mem-vgdb-21723-by-aychoi-on-pe2cc3-054
+==00:00:00:00.354 21723== 
+==00:00:00:00.354 21723== TO CONTROL THIS PROCESS USING vgdb (which you probably
+==00:00:00:00.354 21723== don't want to do, unless you know exactly what you're doing,
+==00:00:00:00.354 21723== or are doing some strange experiment):
+==00:00:00:00.354 21723==   /nfs/sw/valgrind/valgrind-3.17.0/libexec/valgrind/../../bin/vgdb --pid=21723 ...command...
+==00:00:00:00.354 21723== 
+==00:00:00:00.354 21723== TO DEBUG THIS PROCESS USING GDB: start GDB like this
+==00:00:00:00.354 21723==   /path/to/gdb ./eqtl_mapping
+==00:00:00:00.354 21723== and then give GDB the following command
+==00:00:00:00.354 21723==   target remote | /nfs/sw/valgrind/valgrind-3.17.0/libexec/valgrind/../../bin/vgdb --pid=21723
+==00:00:00:00.354 21723== --pid is optional if only one valgrind process is running
+==00:00:00:00.354 21723== 
+--00:00:00:00.370 21723-- REDIR: 0x4019e40 (ld-linux-x86-64.so.2:strlen) redirected to 0x580cc865 (vgPlain_amd64_linux_REDIR_FOR_strlen)
+--00:00:00:00.397 21723-- REDIR: 0x4019c10 (ld-linux-x86-64.so.2:index) redirected to 0x580cc87f (vgPlain_amd64_linux_REDIR_FOR_index)
+--00:00:00:00.436 21723-- Reading syms from /nfs/sw/valgrind/valgrind-3.17.0/libexec/valgrind/vgpreload_core-amd64-linux.so
+--00:00:00:00.451 21723-- Reading syms from /nfs/sw/valgrind/valgrind-3.17.0/libexec/valgrind/vgpreload_memcheck-amd64-linux.so
+==00:00:00:00.463 21723== WARNING: new redirection conflicts with existing -- ignoring it
+--00:00:00:00.463 21723--     old: 0x04019e40 (strlen              ) R-> (0000.0) 0x580cc865 vgPlain_amd64_linux_REDIR_FOR_strlen
+--00:00:00:00.463 21723--     new: 0x04019e40 (strlen              ) R-> (2007.0) 0x04c30940 strlen
+--00:00:00:00.481 21723-- REDIR: 0x4019dc0 (ld-linux-x86-64.so.2:strcmp) redirected to 0x4c31a50 (strcmp)
+--00:00:00:00.484 21723-- REDIR: 0x401aa80 (ld-linux-x86-64.so.2:mempcpy) redirected to 0x4c35ae0 (mempcpy)
+--00:00:00:00.501 21723-- Reading syms from /nfs/sw/openmp/openmp-9.0.1/lib/libomp.so
+--00:00:00:00.545 21723-- Reading syms from /usr/lib64/libpthread-2.17.so
+--00:00:00:00.562 21723-- Reading syms from /nfs/sw/gcc/gcc-11.2.0/lib64/libstdc++.so.6.0.29
+--00:00:00:00.819 21723-- Reading syms from /usr/lib64/libm-2.17.so
+--00:00:00:00.833 21723-- Reading syms from /nfs/sw/gcc/gcc-11.2.0/lib64/libgcc_s.so.1
+--00:00:00:00.853 21723-- Reading syms from /usr/lib64/libc-2.17.so
+--00:00:00:00.947 21723-- Reading syms from /usr/lib64/libdl-2.17.so
+--00:00:00:00.987 21723-- REDIR: 0x5cee1d0 (libc.so.6:strcasecmp) redirected to 0x4a2472f (_vgnU_ifunc_wrapper)
+--00:00:00:00.988 21723-- REDIR: 0x5ceaf40 (libc.so.6:strnlen) redirected to 0x4a2472f (_vgnU_ifunc_wrapper)
+--00:00:00:00.989 21723-- REDIR: 0x5cf04d0 (libc.so.6:strncasecmp) redirected to 0x4a2472f (_vgnU_ifunc_wrapper)
+--00:00:00:00.989 21723-- REDIR: 0x5ced9a0 (libc.so.6:memset) redirected to 0x4a2472f (_vgnU_ifunc_wrapper)
+--00:00:00:00.990 21723-- REDIR: 0x5ced950 (libc.so.6:memcpy@GLIBC_2.2.5) redirected to 0x4a2472f (_vgnU_ifunc_wrapper)
+--00:00:00:00.994 21723-- REDIR: 0x5cea850 (libc.so.6:strcpy) redirected to 0x4a2472f (_vgnU_ifunc_wrapper)
+--00:00:00:01.030 21723-- REDIR: 0x5ceae10 (libc.so.6:strlen) redirected to 0x4a2472f (_vgnU_ifunc_wrapper)
+--00:00:00:01.031 21723-- REDIR: 0x5ce93c0 (libc.so.6:strcmp) redirected to 0x4a2472f (_vgnU_ifunc_wrapper)
+--00:00:00:01.031 21723-- REDIR: 0x5cf2bc0 (libc.so.6:memcpy@@GLIBC_2.14) redirected to 0x4a2472f (_vgnU_ifunc_wrapper)
+--00:00:00:01.032 21723-- REDIR: 0x5cedb00 (libc.so.6:mempcpy) redirected to 0x4a2472f (_vgnU_ifunc_wrapper)
+--00:00:00:01.048 21723-- REDIR: 0x5ceae60 (libc.so.6:__GI_strlen) redirected to 0x4c308a0 (__GI_strlen)
+--00:00:00:01.056 21723-- REDIR: 0x5cec930 (libc.so.6:__GI_strrchr) redirected to 0x4c30300 (__GI_strrchr)
+--00:00:00:01.085 21723-- REDIR: 0x5ce3740 (libc.so.6:malloc) redirected to 0x4c2af90 (malloc)
+--00:00:00:01.097 21723-- REDIR: 0x5ceb060 (libc.so.6:__GI_strncmp) redirected to 0x4c31090 (__GI_strncmp)
+--00:00:00:01.101 21723-- REDIR: 0x5ced7c0 (libc.so.6:__GI_memmove) redirected to 0x4c34e70 (__GI_memmove)
+--00:00:00:01.107 21723-- REDIR: 0x5ce3b60 (libc.so.6:free) redirected to 0x4c2d516 (free)
+--00:00:00:01.135 21723-- REDIR: 0x5ce4160 (libc.so.6:calloc) redirected to 0x4c2f6de (calloc)
+--00:00:00:01.164 21723-- REDIR: 0x5ced3c0 (libc.so.6:__GI_memcmp) redirected to 0x4c33fa0 (__GI_memcmp)
+--00:00:00:01.195 21723-- REDIR: 0x5d9cfc0 (libc.so.6:__strcmp_sse42) redirected to 0x4c31a00 (__strcmp_sse42)
+--00:00:00:01.209 21723-- REDIR: 0x5dcd8b0 (libc.so.6:__strlen_sse2_pminub) redirected to 0x4c30880 (strlen)
+--00:00:00:01.231 21723-- REDIR: 0x5cedb70 (libc.so.6:__GI_mempcpy) redirected to 0x4c35810 (__GI_mempcpy)
+--00:00:00:01.236 21723-- REDIR: 0x5db2c70 (libc.so.6:__memcpy_ssse3_back) redirected to 0x4c31f00 (memcpy@@GLIBC_2.14)
+--00:00:00:01.238 21723-- REDIR: 0x53e5c70 (libstdc++.so.6:operator new(unsigned long)) redirected to 0x4c2b6b1 (operator new(unsigned long))
+--00:00:00:01.244 21723-- REDIR: 0x5db8210 (libc.so.6:__memmove_ssse3_back) redirected to 0x4c31bb0 (memcpy@GLIBC_2.2.5)
+--00:00:00:01.245 21723-- REDIR: 0x53e4000 (libstdc++.so.6:operator delete(void*, unsigned long)) redirected to 0x4c2dcb4 (operator delete(void*, unsigned long))
+--00:00:00:01.252 21723-- REDIR: 0xffffffffff600400 (???:???) redirected to 0x580cc851 (vgPlain_amd64_linux_REDIR_FOR_vtime)
+--00:00:00:01.253 21723-- REDIR: 0x5ced030 (libc.so.6:memchr) redirected to 0x4c31af0 (memchr)
+--00:00:00:01.260 21723-- REDIR: 0x53e3ff0 (libstdc++.so.6:operator delete(void*)) redirected to 0x4c2da5c (operator delete(void*))
+--00:00:00:01.400 21723-- REDIR: 0x5d03a10 (libc.so.6:__GI_strstr) redirected to 0x4c35d70 (__strstr_sse2)
+--00:00:00:01.403 21723-- REDIR: 0x53e5cd0 (libstdc++.so.6:operator new[](unsigned long)) redirected to 0x4c2c78f (operator new[](unsigned long))
+--00:00:00:01.447 21723-- REDIR: 0x5ced380 (libc.so.6:bcmp) redirected to 0x4a2472f (_vgnU_ifunc_wrapper)
+--00:00:00:01.448 21723-- REDIR: 0x5dc81e0 (libc.so.6:__memcmp_sse4_1) redirected to 0x4c340e0 (__memcmp_sse4_1)
+--00:00:00:01.871 21723-- REDIR: 0x5cf44b0 (libc.so.6:strchrnul) redirected to 0x4c35600 (strchrnul)
+--00:00:00:15.474 21723-- REDIR: 0x5ce9340 (libc.so.6:__GI_strchr) redirected to 0x4c30430 (__GI_strchr)
+--00:00:00:15.554 21723-- REDIR: 0x5cf2c30 (libc.so.6:__GI_memcpy) redirected to 0x4c32700 (__GI_memcpy)
+--00:00:00:15.557 21723-- REDIR: 0x5da69d0 (libc.so.6:__strncasecmp_avx) redirected to 0x4c312c0 (strncasecmp)
+--00:00:00:16.198 21723-- REDIR: 0x5ce9400 (libc.so.6:__GI_strcmp) redirected to 0x4c31960 (__GI_strcmp)
+--00:00:00:16.357 21723-- REDIR: 0x5cee060 (libc.so.6:__GI_stpcpy) redirected to 0x4c343a0 (__GI_stpcpy)
+--00:00:00:17.846 21723-- REDIR: 0x5ce5cb0 (libc.so.6:posix_memalign) redirected to 0x4c2fb87 (posix_memalign)
+--00:00:00:18.032 21723-- REDIR: 0x5ceda00 (libc.so.6:__GI_memset) redirected to 0x4c34a30 (memset)
+--00:00:00:20.289 21723-- REDIR: 0x5ce3c40 (libc.so.6:realloc) redirected to 0x4c2f8fb (realloc)
+--00:00:00:20.310 21723-- Reading syms from /usr/lib64/libnss_files-2.17.so
+--00:00:00:20.322 21723-- REDIR: 0x5cec8b0 (libc.so.6:strncpy) redirected to 0x4a2472f (_vgnU_ifunc_wrapper)
+--00:00:00:20.323 21723-- REDIR: 0x5ceb020 (libc.so.6:strncmp) redirected to 0x4a2472f (_vgnU_ifunc_wrapper)
+--00:00:00:20.324 21723-- REDIR: 0x5cee020 (libc.so.6:stpcpy) redirected to 0x4a2472f (_vgnU_ifunc_wrapper)
+--00:00:00:20.325 21723-- REDIR: 0x5ce9300 (libc.so.6:index) redirected to 0x4a2472f (_vgnU_ifunc_wrapper)
+--00:00:00:20.326 21723-- REDIR: 0x5cf4270 (libc.so.6:rawmemchr) redirected to 0x4a2472f (_vgnU_ifunc_wrapper)
+--00:00:00:20.335 21723-- REDIR: 0x5cea890 (libc.so.6:__GI_strcpy) redirected to 0x4c30a40 (__GI_strcpy)
+--00:00:00:20.651 21723-- REDIR: 0x5cf42a0 (libc.so.6:__GI___rawmemchr) redirected to 0x4c35660 (__GI___rawmemchr)
+--00:00:00:20.659 21723-- REDIR: 0x5da5360 (libc.so.6:__strcasecmp_avx) redirected to 0x4c311e0 (strcasecmp)
+--00:00:00:20.665 21723-- REDIR: 0x5cf9de0 (libc.so.6:__stpcpy_sse2_unaligned) redirected to 0x4c34560 (__stpcpy_sse2_unaligned)
+--00:00:00:23.025 21723-- REDIR: 0xffffffffff600000 (???:???) redirected to 0x580cc847 (vgPlain_amd64_linux_REDIR_FOR_vgettimeofday)
+--00:00:00:23.708 21723-- REDIR: 0x53e5cb0 (libstdc++.so.6:operator new(unsigned long, std::nothrow_t const&)) redirected to 0x4c2be50 (operator new(unsigned long, std::nothrow_t const&))
+--00:00:00:28.207 21723-- REDIR: 0x53e4020 (libstdc++.so.6:operator delete[](void*)) redirected to 0x4c2e998 (operator delete[](void*))
+==00:02:19:19.193 21723== Warning: set address range perms: large range [0x258db4028, 0x268db4058) (noaccess)
+==00:02:23:57.328 21723== Warning: set address range perms: large range [0x1db218028, 0x1eb218058) (noaccess)
+==00:02:24:49.044 21723== Warning: set address range perms: large range [0x278db6028, 0x288db6058) (noaccess)
+==00:02:29:39.130 21723== Warning: set address range perms: large range [0x1f721a028, 0x20721a058) (noaccess)
+==00:02:39:00.320 21723== Warning: set address range perms: large range [0x268db5028, 0x278db5058) (noaccess)
+==00:02:39:07.276 21723== Warning: set address range perms: large range [0x114a0e028, 0x124a0e058) (noaccess)
+==00:02:41:27.645 21723== Warning: set address range perms: large range [0x288db7028, 0x298db7058) (noaccess)
+==00:02:41:33.874 21723== Warning: set address range perms: large range [0x124a0f028, 0x134a0f058) (noaccess)
+--00:02:41:42.815 21723-- Discarding syms at 0xd6fbd1b0-0xd6fc4501 in /usr/lib64/libnss_files-2.17.so (have_dinfo 1)
+==00:02:41:42.822 21723== 
+==00:02:41:42.849 21723== HEAP SUMMARY:
+==00:02:41:42.849 21723==     in use at exit: 0 bytes in 0 blocks
+==00:02:41:42.849 21723==   total heap usage: 159,034,429 allocs, 159,034,429 frees, 26,186,338,789 bytes allocated
+==00:02:41:42.849 21723== 
+==00:02:41:42.849 21723== All heap blocks were freed -- no leaks are possible
+==00:02:41:42.849 21723== 
+==00:02:41:42.849 21723== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
